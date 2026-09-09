@@ -1,0 +1,12 @@
+*.iml
+.gradle/
+local.properties
+.idea/
+.DS_Store
+build/
+captures/
+.externalNativeBuild/
+.cxx/
+
+# Generated canvas payload (2.4MB of editor code); re-seed from design/*.dc.html
+design/remix-app-screens.html

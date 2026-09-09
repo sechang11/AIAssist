@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Remix</string>
+    <!-- Shown in the text selection toolbar. Keep it to one short word. -->
+    <string name="process_text_label">Remix</string>
+</resources>

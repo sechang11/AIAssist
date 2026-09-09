@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Remix — the bubble</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap">
+<style>
+  :root {
+    --accent: #4f46e5;
+    --ink: oklch(24% 0.015 60);
+    --muted: oklch(56% 0.012 65);
+    --faint: oklch(65% 0.012 65);
+    --line: oklch(92% 0.006 75);
+    --page: oklch(97.5% 0.005 85);
+    --card: oklch(100% 0 0);
+    --soft: color-mix(in oklab, var(--accent) 9%, white);
+    --strong: color-mix(in oklab, var(--accent) 20%, white);
+    --edge: color-mix(in oklab, var(--accent) 45%, white);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: 'Manrope', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+    background: oklch(23% 0.008 70);
+    color: oklch(92% 0.006 80);
+    padding: 40px 28px 64px 28px;
+  }
+  h1 { font-size: 26px; font-weight: 800; letter-spacing: -0.02em; margin: 0 0 6px 0; }
+  .lede { font-size: 15px; line-height: 1.6; color: oklch(70% 0.008 75); max-width: 66ch; margin: 0 0 36px 0; }
+  .rail { display: flex; gap: 40px; align-items: flex-start; overflow-x: auto; padding-bottom: 20px; }
+  .col { flex: none; width: 390px; display: flex; flex-direction: column; gap: 14px; }
+  .tagbuilt, .tagalt {
+    display: inline-block; font-size: 10px; font-weight: 800; letter-spacing: .09em;
+    text-transform: uppercase; padding: 3px 8px; border-radius: 5px;
+  }
+  .tagbuilt { background: oklch(48% .13 155); color: #fff; }
+  .tagalt { background: oklch(40% .02 70); color: oklch(80% .01 75); }
+  .cap-t { font-size: 16px; font-weight: 700; letter-spacing: -0.01em; margin-top: 8px; }
+  .cap-b { font-size: 13px; line-height: 1.55; color: oklch(68% 0.008 75); margin-top: 4px; }
+  .phone {
+    position: relative; width: 390px; height: 844px; background: var(--page); color: var(--ink);
+    border-radius: 26px; overflow: hidden;
+    box-shadow: 0 10px 40px rgba(0,0,0,.42);
+  }
+
+  /* the app behind */
+  .appbar {
+    display: flex; align-items: center; gap: 10px; padding: 14px 16px;
+    background: var(--card); border-bottom: 1px solid var(--line);
+  }
+  .av {
+    display: flex; align-items: center; justify-content: center; width: 34px; height: 34px;
+    border-radius: 50%; background: oklch(88% .045 145); color: oklch(38% .08 145);
+    font-size: 14px; font-weight: 700;
+  }
+  .thread { padding: 18px 16px; display: flex; flex-direction: column; gap: 10px; }
+  .inb {
+    max-width: 76%; align-self: flex-start; background: var(--card); border: 1px solid var(--line);
+    border-radius: 18px 18px 18px 5px; padding: 11px 14px; font-size: 15px; line-height: 1.45;
+  }
+  .outb {
+    max-width: 76%; align-self: flex-end; background: color-mix(in oklab, var(--accent) 14%, white);
+    border-radius: 18px 18px 5px 18px; padding: 11px 14px; font-size: 15px; line-height: 1.45;
+  }
+
+  /* the chat head */
+  .head {
+    position: absolute; width: 56px; height: 56px; border-radius: 50%;
+    background: var(--accent); color: #fff; display: flex; align-items: center; justify-content: center;
+    font-size: 22px; font-weight: 800; box-shadow: 0 4px 14px rgba(30,25,60,.4);
+  }
+  .head.faded { opacity: .55; }
+
+  .target {
+    position: absolute; left: 50%; bottom: 64px; transform: translateX(-50%);
+    width: 64px; height: 64px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    background: oklch(92% .01 75); box-shadow: 0 4px 14px rgba(30,25,60,.28);
+  }
+  .target.armed {
+    width: 78px; height: 78px; background: oklch(52% .19 25);
+  }
+
+  /* the panel, identical markup at two widths */
+  .panel {
+    background: var(--page); border-radius: 22px; padding: 14px;
+    box-shadow: 0 6px 18px rgba(30,25,60,.2), 0 20px 50px rgba(30,25,60,.28);
+  }
+  .pills { display: flex; gap: 7px; }
+  .pill {
+    flex: 1; height: 42px; border-radius: 21px; border: 1.5px solid oklch(87% .008 75);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 600; color: oklch(38% .014 62); white-space: nowrap;
+  }
+  .pill.on { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 700; }
+  .msg {
+    margin-top: 12px; background: var(--card); border: 1px solid var(--line); border-radius: 16px;
+    padding: 12px 13px 15px 13px; font-size: 17px; line-height: 2.4; letter-spacing: -.006em;
+  }
+  .seg {
+    background: var(--soft); border-radius: 8px; padding: 9px 7px; margin-right: 3px;
+    -webkit-box-decoration-break: clone; box-decoration-break: clone;
+  }
+  .hint {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 14px 0 12px 0; font-size: 13px; font-weight: 500; color: oklch(62% .012 65);
+  }
+  .cta {
+    height: 50px; border-radius: 25px; background: var(--accent); color: #fff;
+    display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700;
+  }
+
+  .sheet { position: absolute; left: 10px; right: 10px; bottom: 10px; }
+  .balloonwrap { position: absolute; right: 10px; top: 210px; width: 300px; }
+  .tail {
+    position: absolute; right: 26px; top: -8px; width: 18px; height: 18px;
+    background: var(--page); transform: rotate(45deg); border-radius: 3px;
+  }
+  .measure {
+    position: absolute; left: 0; right: 0; bottom: -30px;
+    display: flex; align-items: center; gap: 8px;
+    font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+  }
+  @media (max-width: 900px) { .rail { flex-direction: column; align-items: center; } }
+</style>
+</head>
+<body>
+
+<h1>The bubble</h1>
+<p class="lede">Frames one and two are how it rests and how you put it away. Three and four are the open question: the panel is currently a bottom sheet, and the alternative is a balloon hanging off the circle. Same content in both, so the width difference is real rather than asserted.</p>
+
+<div class="rail">
+
+  <!-- 1 resting -->
+  <div class="col">
+    <div>
+      <span class="tagbuilt">Built</span>
+      <div class="cap-t">Resting</div>
+      <div class="cap-b">Parked on the nearest edge, faded back after a couple of seconds so it stops competing with the app. Touching it wakes it. Drag it anywhere and it flies back to an edge when you let go.</div>
+    </div>
+    <div class="phone">
+      <div class="appbar">
+        <div class="av">M</div>
+        <div style="font-size:16px;font-weight:700;">Maya</div>
+      </div>
+      <div class="thread">
+        <div class="inb">are we still on for friday? no stress if you need to push it</div>
+        <div class="outb">one sec, let me check</div>
+        <div class="inb">no rush at all</div>
+      </div>
+      <div class="head faded" style="right:0;top:330px;">R</div>
+    </div>
+  </div>
+
+  <!-- 2 dismissing -->
+  <div class="col">
+    <div>
+      <span class="tagbuilt">Built</span>
+      <div class="cap-t">Putting it away</div>
+      <div class="cap-b">The target appears the moment a drag starts. Come within reach and it swells, turns red and takes the bubble magnetically. Let go there and the bubble is gone until you turn it back on.</div>
+    </div>
+    <div class="phone">
+      <div class="appbar">
+        <div class="av">M</div>
+        <div style="font-size:16px;font-weight:700;">Maya</div>
+      </div>
+      <div class="thread">
+        <div class="inb">are we still on for friday? no stress if you need to push it</div>
+        <div class="outb">one sec, let me check</div>
+        <div class="inb">no rush at all</div>
+      </div>
+      <div class="target armed">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </div>
+      <div class="head" style="left:167px;bottom:94px;">R</div>
+    </div>
+  </div>
+
+  <!-- 3 bottom sheet -->
+  <div class="col">
+    <div>
+      <span class="tagbuilt">Built</span>
+      <div class="cap-t">Opened as a bottom sheet</div>
+      <div class="cap-b">Full width, so the message reads in four lines and the three tone pills sit comfortably. The cost is that it no longer looks attached to the bubble you tapped.</div>
+    </div>
+    <div class="phone">
+      <div class="appbar">
+        <div class="av">M</div>
+        <div style="font-size:16px;font-weight:700;">Maya</div>
+      </div>
+      <div class="thread">
+        <div class="inb">are we still on for friday? no stress if you need to push it</div>
+      </div>
+      <div class="head faded" style="right:0;top:300px;">R</div>
+
+      <div class="sheet">
+        <div class="panel">
+          <div class="pills">
+            <div class="pill">Concise</div>
+            <div class="pill on">Warm</div>
+            <div class="pill">Formal</div>
+          </div>
+          <div class="msg">
+            <span class="seg">Sorry I went quiet!</span><span class="seg">This week's been mental.</span><span class="seg">Friday still works for me.</span><span class="seg" style="margin-right:0;">See you Friday!</span>
+          </div>
+          <div class="hint">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3H5a2 2 0 0 0-2 2v4M15 3h4a2 2 0 0 1 2 2v4M21 15v4a2 2 0 0 1-2 2h-4M3 15v4a2 2 0 0 0 2 2h4"/></svg>
+            Tap any highlighted part to change it
+          </div>
+          <div class="cta">Copy</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4 balloon -->
+  <div class="col">
+    <div>
+      <span class="tagalt">Alternative</span>
+      <div class="cap-t">Opened as a balloon</div>
+      <div class="cap-b">Hangs off the circle, so the connection is obvious and the app stays visible around it. But the same message now runs to six lines and the tone pills are tight. Messenger gets away with this because a chat thread is narrow.</div>
+    </div>
+    <div class="phone">
+      <div class="appbar">
+        <div class="av">M</div>
+        <div style="font-size:16px;font-weight:700;">Maya</div>
+      </div>
+      <div class="thread">
+        <div class="inb">are we still on for friday? no stress if you need to push it</div>
+        <div class="outb">one sec, let me check</div>
+        <div class="inb">no rush at all</div>
+      </div>
+      <div class="head" style="right:10px;top:150px;">R</div>
+
+      <div class="balloonwrap">
+        <div class="panel" style="position:relative;">
+          <div class="tail"></div>
+          <div class="pills">
+            <div class="pill">Concise</div>
+            <div class="pill on">Warm</div>
+            <div class="pill">Formal</div>
+          </div>
+          <div class="msg">
+            <span class="seg">Sorry I went quiet!</span><span class="seg">This week's been mental.</span><span class="seg">Friday still works for me.</span><span class="seg" style="margin-right:0;">See you Friday!</span>
+          </div>
+          <div class="hint" style="font-size:12px;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3H5a2 2 0 0 0-2 2v4M15 3h4a2 2 0 0 1 2 2v4M21 15v4a2 2 0 0 1-2 2h-4M3 15v4a2 2 0 0 0 2 2h4"/></svg>
+            Tap a part to change it
+          </div>
+          <div class="cta">Copy</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

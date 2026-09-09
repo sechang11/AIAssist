@@ -1,0 +1,481 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Remix — concept screens</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap">
+<style>
+  :root {
+    --accent: #4f46e5;
+    --ink: oklch(24% 0.015 60);
+    --muted: oklch(56% 0.012 65);
+    --faint: oklch(65% 0.012 65);
+    --line: oklch(92% 0.006 75);
+    --page: oklch(97.5% 0.005 85);
+    --card: oklch(100% 0 0);
+    --soft: color-mix(in oklab, var(--accent) 9%, white);
+    --strong: color-mix(in oklab, var(--accent) 20%, white);
+    --edge: color-mix(in oklab, var(--accent) 45%, white);
+    --faintbg: color-mix(in oklab, var(--accent) 6%, white);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: 'Manrope', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+    background: oklch(23% 0.008 70);
+    color: oklch(92% 0.006 80);
+    padding: 40px 28px 64px 28px;
+  }
+  h1 { font-size: 26px; font-weight: 800; letter-spacing: -0.02em; margin: 0 0 6px 0; }
+  .lede { font-size: 15px; line-height: 1.6; color: oklch(70% 0.008 75); max-width: 60ch; margin: 0 0 36px 0; }
+  .rail { display: flex; gap: 40px; align-items: flex-start; overflow-x: auto; padding-bottom: 20px; }
+  .col { flex: none; width: 390px; display: flex; flex-direction: column; gap: 14px; }
+  .cap-n { font-size: 11px; font-weight: 800; letter-spacing: 0.09em; text-transform: uppercase; color: var(--accent); filter: brightness(1.9); }
+  .cap-t { font-size: 16px; font-weight: 700; letter-spacing: -0.01em; margin-top: 4px; }
+  .cap-b { font-size: 13px; line-height: 1.55; color: oklch(68% 0.008 75); }
+  .phone {
+    width: 390px; background: var(--page); color: var(--ink);
+    border-radius: 26px; overflow: hidden; display: flex; flex-direction: column;
+    box-shadow: 0 10px 40px rgba(0,0,0,.42);
+  }
+  .t-844 { height: 844px; }
+  .t-560 { height: 560px; }
+  .lbl { font-size: 11px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--faint); }
+  .bar { display:flex; align-items:center; gap:8px; padding: 8px 16px 6px 8px; }
+  .tap44 { display:flex; align-items:center; justify-content:center; width:44px; height:44px; flex:none; }
+  .title { font-size:19px; font-weight:700; letter-spacing:-.01em; }
+  .seg {
+    background: var(--soft); border-radius: 8px; padding: 9px 7px; margin-right: 3px;
+    cursor: pointer; -webkit-box-decoration-break: clone; box-decoration-break: clone;
+  }
+  .seg.on { background: var(--strong); box-shadow: inset 0 0 0 1.5px var(--edge); }
+  .pill {
+    flex:1; height:46px; border-radius:23px; border:1.5px solid oklch(87% .008 75);
+    background:transparent; color:oklch(38% .014 62); font:600 14px 'Manrope', sans-serif;
+    letter-spacing:-.005em; cursor:pointer;
+  }
+  .pill.on { background: var(--accent); border-color: var(--accent); color:#fff; font-weight:700; }
+  .opt {
+    display:flex; align-items:center; gap:11px; min-height:52px; padding:8px 12px;
+    border-radius:13px; background:transparent; box-shadow: inset 0 0 0 1.5px oklch(93% .006 75); cursor:pointer;
+  }
+  .opt.on { background: var(--faintbg); box-shadow: inset 0 0 0 1.5px var(--edge); }
+  .dot { flex:none; width:17px; height:17px; border-radius:50%; background:transparent; box-shadow: inset 0 0 0 2px oklch(82% .01 70); }
+  .opt.on .dot { background: var(--accent); box-shadow: inset 0 0 0 2px var(--accent); }
+  .opt-tone { font-size:10px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:var(--faint); margin-bottom:2px; }
+  .opt.on .opt-tone { color: var(--accent); }
+  .opt-text { font-size:15px; line-height:1.35; font-weight:500; letter-spacing:-.006em; }
+  .opt.on .opt-text { font-weight:600; }
+  .chip {
+    display:flex; align-items:center; gap:6px; height:40px; padding:0 14px; border-radius:20px;
+    border:1px dashed oklch(80% .01 70); background:transparent; color:oklch(45% .012 65);
+    font:600 12.5px 'Manrope', sans-serif; cursor:pointer;
+  }
+  .rcard {
+    display:flex; align-items:center; gap:12px; background:var(--card); border:1px solid var(--line);
+    border-radius:16px; padding:15px 14px 15px 16px; box-shadow:0 1px 2px oklch(60% .02 70 / .05);
+  }
+  .key {
+    flex:1; height:44px; border-radius:6px; background:oklch(99.5% .002 85);
+    box-shadow:0 1px 0 oklch(70% .01 70 / .35); display:flex; align-items:center; justify-content:center;
+    font-size:16px; font-weight:500; color:oklch(35% .012 62);
+  }
+  @media (max-width: 900px) { .rail { flex-direction: column; align-items: center; } }
+</style>
+</head>
+<body>
+
+<h1>Remix — concept screens</h1>
+<p class="lede">Four Android screens, left to right as a flow. The second one is live: tap a tone to swap the whole message, or tap any highlighted phrase to change just that beat.</p>
+
+<div class="rail">
+
+  <!-- 1 -->
+  <div class="col">
+    <div>
+      <div class="cap-n">1 · Getting in</div>
+      <div class="cap-t">The selection toolbar</div>
+      <div class="cap-b">Select what you already wrote, in any app, and tap Remix in the toolbar Android shows anyway. No accessibility service, no overlay permission.</div>
+    </div>
+
+    <div class="phone t-844">
+      <div style="display:flex;align-items:center;gap:8px;padding:8px 16px;background:var(--card);border-bottom:1px solid var(--line);">
+        <div class="tap44"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="oklch(40% .015 60)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></div>
+        <div style="display:flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;background:oklch(88% .045 145);color:oklch(38% .08 145);font-size:15px;font-weight:700;">M</div>
+        <div style="flex:1;">
+          <div style="font-size:16px;font-weight:700;letter-spacing:-.01em;">Maya</div>
+          <div style="font-size:12px;color:var(--faint);">active 20m ago</div>
+        </div>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="oklch(50% .012 65)"><circle cx="12" cy="5" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="12" cy="19" r="1.7"/></svg>
+      </div>
+
+      <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;gap:8px;padding:20px 16px 8px 16px;min-height:0;">
+        <div style="align-self:center;font-size:11px;font-weight:600;color:var(--faint);padding-bottom:6px;">Tuesday</div>
+        <div style="max-width:78%;align-self:flex-start;background:var(--card);border:1px solid var(--line);border-radius:18px 18px 18px 5px;padding:11px 14px;font-size:15px;line-height:1.45;">are we still on for friday? no stress if you need to push it</div>
+        <div style="align-self:flex-start;font-size:11px;color:var(--faint);padding-left:6px;">10:42</div>
+      </div>
+
+      <div style="display:flex;justify-content:center;padding:6px 16px 10px 16px;">
+        <div style="display:flex;background:var(--card);border-radius:12px;box-shadow:0 2px 6px rgba(60,50,40,.14),0 12px 30px rgba(60,50,40,.18);overflow:hidden;">
+          <div style="display:flex;align-items:center;padding:0 15px;height:48px;font-size:14px;font-weight:600;color:oklch(42% .014 62);">Cut</div>
+          <div style="display:flex;align-items:center;padding:0 15px;height:48px;font-size:14px;font-weight:600;color:oklch(42% .014 62);">Copy</div>
+          <div style="display:flex;align-items:center;padding:0 15px;height:48px;font-size:14px;font-weight:600;color:oklch(42% .014 62);">Paste</div>
+          <div style="display:flex;align-items:center;gap:7px;padding:0 16px;height:48px;font-size:14px;font-weight:800;color:var(--accent);background:color-mix(in oklab, var(--accent) 8%, white);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h11M15 4l3 3-3 3"/><path d="M20 17H9M9 14l-3 3 3 3"/></svg>
+            Remix
+          </div>
+          <div style="display:flex;align-items:center;padding:0 12px;height:48px;border-left:1px solid oklch(94% .006 75);">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="oklch(50% .012 65)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;align-items:flex-end;gap:10px;padding:8px 14px 26px 14px;background:var(--card);border-top:1px solid var(--line);">
+        <div style="flex:1;position:relative;background:oklch(96.5% .005 80);border-radius:22px;padding:12px 15px;">
+          <div style="font-size:15px;line-height:1.5;"><span style="background:color-mix(in oklab, var(--accent) 26%, white);border-radius:3px;-webkit-box-decoration-break:clone;box-decoration-break:clone;">hey so sorry i didnt get back to you sooner, this week has been mental. friday still works for me if thats ok? really looking forward to it</span></div>
+          <div style="position:absolute;left:12px;top:6px;width:12px;height:12px;border-radius:50% 50% 50% 0;background:var(--accent);transform:rotate(-45deg);"></div>
+          <div style="position:absolute;right:26px;bottom:6px;width:12px;height:12px;border-radius:50% 50% 0 50%;background:var(--accent);transform:rotate(-45deg);"></div>
+        </div>
+        <div style="flex:none;display:flex;align-items:center;justify-content:center;width:46px;height:46px;border-radius:50%;background:oklch(93% .008 75);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="oklch(58% .012 65)" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 12L20 4l-4 8 4 8z"/></svg>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2 -->
+  <div class="col">
+    <div>
+      <div class="cap-n">2 · The one that matters</div>
+      <div class="cap-t">Remix — this one is live, try it</div>
+      <div class="cap-b">The message is the interface. Tap a tone to swap all of it; tap any highlighted phrase to change that beat alone. You read one message that changes under your thumb, instead of comparing three drafts.</div>
+    </div>
+
+    <div class="phone t-844">
+      <div class="bar">
+        <div class="tap44"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="oklch(40% .015 60)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></div>
+        <div class="title">Remix</div>
+      </div>
+
+      <div style="padding:2px 20px 12px 20px;">
+        <div class="lbl" style="margin-bottom:2px;">You wrote</div>
+        <div style="font-size:13px;line-height:1.45;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">hey so sorry i didnt get back to you sooner, this week has been mental. friday still works for me if thats ok?</div>
+      </div>
+
+      <div id="tones" style="display:flex;gap:8px;padding:0 20px 14px 20px;"></div>
+
+      <div style="margin:0 20px;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px 15px 18px 15px;box-shadow:0 1px 2px oklch(60% .02 70 / .06),0 8px 20px oklch(60% .02 70 / .05);">
+        <div id="msg" style="font-size:17px;line-height:2.45;letter-spacing:-.006em;text-wrap:pretty;"></div>
+      </div>
+
+      <div id="left-out" style="display:none;align-items:center;gap:8px;padding:12px 20px 0 20px;"></div>
+
+      <div id="zone" style="flex:1;padding:14px 20px 0 20px;min-height:0;overflow-y:auto;"></div>
+
+      <div style="display:flex;align-items:center;gap:10px;padding:12px 20px 26px 20px;border-top:1px solid var(--line);background:oklch(99% .004 85);">
+        <button id="copy" type="button" style="height:52px;padding:0 20px;border-radius:26px;border:1.5px solid oklch(88% .008 75);background:transparent;color:oklch(38% .014 62);font:700 15px 'Manrope',sans-serif;cursor:pointer;">Copy</button>
+        <button id="replace" type="button" style="flex:1;height:52px;border-radius:26px;border:none;background:var(--accent);color:#fff;font:700 16px 'Manrope',sans-serif;letter-spacing:-.005em;cursor:pointer;">Replace</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3 -->
+  <div class="col">
+    <div>
+      <div class="cap-n">3 · Phase 2</div>
+      <div class="cap-t">As a keyboard</div>
+      <div class="cap-b">Same idea with no app switch. The compose field carries the highlighted parts, the strip above the keys carries the tones. This is where it stops feeling like a detour.</div>
+    </div>
+
+    <div class="phone t-560">
+      <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;background:var(--card);border-bottom:1px solid var(--line);">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="oklch(40% .015 60)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        <div style="display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;background:oklch(88% .045 145);color:oklch(38% .08 145);font-size:14px;font-weight:700;">M</div>
+        <div style="font-size:16px;font-weight:700;letter-spacing:-.01em;">Maya</div>
+      </div>
+
+      <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;padding:16px 16px 10px 16px;min-height:0;">
+        <div style="max-width:78%;align-self:flex-start;background:var(--card);border:1px solid var(--line);border-radius:18px 18px 18px 5px;padding:11px 14px;font-size:15px;line-height:1.45;">are we still on for friday? no stress if you need to push it</div>
+      </div>
+
+      <div style="display:flex;align-items:flex-end;gap:10px;padding:8px 14px 12px 14px;background:var(--card);border-top:1px solid var(--line);">
+        <div style="flex:1;background:oklch(96.5% .005 80);border-radius:20px;padding:10px 13px;">
+          <div style="font-size:15px;line-height:2.3;"><span class="seg" style="padding:8px 6px;">Sorry I went quiet!</span><span class="seg" style="padding:8px 6px;">This week's been mental.</span><span class="seg" style="padding:8px 6px;">Friday still works for me.</span><span class="seg" style="padding:8px 6px;margin-right:0;">See you Friday!</span></div>
+        </div>
+        <div style="flex:none;display:flex;align-items:center;justify-content:center;width:46px;height:46px;border-radius:50%;background:var(--accent);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 12L20 4l-4 8 4 8z"/></svg>
+        </div>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:8px;padding:9px 12px;background:oklch(94.5% .006 80);border-top:1px solid oklch(89% .008 75);">
+        <div style="flex:none;display:flex;align-items:center;justify-content:center;width:40px;height:44px;border-radius:12px;background:var(--accent);">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h11M15 4l3 3-3 3"/><path d="M20 17H9M9 14l-3 3 3 3"/></svg>
+        </div>
+        <div style="flex:1;display:flex;gap:6px;">
+          <div style="flex:1;display:flex;align-items:center;justify-content:center;height:44px;border-radius:22px;border:1.5px solid oklch(85% .008 75);background:oklch(99% .004 85);font-size:13px;font-weight:600;color:oklch(40% .014 62);">Concise</div>
+          <div style="flex:1;display:flex;align-items:center;justify-content:center;height:44px;border-radius:22px;background:var(--accent);color:#fff;font-size:13px;font-weight:700;">Warm</div>
+          <div style="flex:1;display:flex;align-items:center;justify-content:center;height:44px;border-radius:22px;border:1.5px solid oklch(85% .008 75);background:oklch(99% .004 85);font-size:13px;font-weight:600;color:oklch(40% .014 62);">Formal</div>
+        </div>
+        <div style="flex:none;display:flex;align-items:center;justify-content:center;width:40px;height:44px;border-radius:12px;background:oklch(99% .004 85);border:1.5px solid oklch(85% .008 75);">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="oklch(38% .014 62)" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:5px;padding:7px 5px 0 5px;background:oklch(91.5% .006 80);">
+        <div class="key">q</div><div class="key">w</div><div class="key">e</div><div class="key">r</div><div class="key">t</div>
+        <div class="key">y</div><div class="key">u</div><div class="key">i</div><div class="key">o</div><div class="key">p</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4 -->
+  <div class="col">
+    <div>
+      <div class="cap-n">4 · Phase 3</div>
+      <div class="cap-t">Suggesting replies</div>
+      <div class="cap-b">Three different answers rather than three tones of one answer; the tones come after, in screen 2. Reading the message you are replying to needs notification access, so the app says where it got it before showing anything.</div>
+    </div>
+
+    <div class="phone t-844">
+      <div class="bar">
+        <div class="tap44"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="oklch(40% .015 60)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></div>
+        <div class="title">Reply to Maya</div>
+      </div>
+
+      <div style="margin:6px 20px 0 20px;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:15px 16px;">
+        <div style="display:flex;align-items:center;gap:9px;margin-bottom:9px;">
+          <div style="display:flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:oklch(88% .045 145);color:oklch(38% .08 145);font-size:11px;font-weight:700;">M</div>
+          <div style="font-size:12px;font-weight:700;color:oklch(45% .014 62);">Maya</div>
+          <div style="font-size:12px;color:var(--faint);">10:42</div>
+        </div>
+        <div style="font-size:15px;line-height:1.5;color:oklch(34% .014 62);">are we still on for friday? no stress if you need to push it</div>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:11px;margin:12px 20px 0 20px;background:oklch(94.5% .006 80);border-radius:14px;padding:12px 14px;">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="oklch(52% .012 65)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex:none;"><path d="M12 22a2 2 0 0 0 2-2h-4a2 2 0 0 0 2 2z"/><path d="M18 16V11a6 6 0 1 0-12 0v5l-1.6 2.4A1 1 0 0 0 5.2 20h13.6a1 1 0 0 0 .8-1.6z"/></svg>
+        <div style="flex:1;font-size:12.5px;line-height:1.45;color:oklch(45% .014 62);">Read from your notifications, not your screen.</div>
+        <div style="flex:none;display:flex;align-items:center;justify-content:center;height:44px;padding:0 12px;font-size:12.5px;font-weight:700;color:var(--accent);">Turn off</div>
+      </div>
+
+      <div class="lbl" style="padding:22px 20px 12px 20px;">Three ways to answer</div>
+
+      <div style="display:flex;flex-direction:column;gap:10px;padding:0 20px;">
+        <div class="rcard">
+          <div style="flex:1;">
+            <div style="font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--accent);margin-bottom:5px;">Yes</div>
+            <div style="font-size:15.5px;line-height:1.4;letter-spacing:-.006em;">Friday still works. See you then.</div>
+          </div>
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="oklch(70% .012 65)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+        </div>
+        <div class="rcard">
+          <div style="flex:1;">
+            <div style="font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--accent);margin-bottom:5px;">Yes, but later</div>
+            <div style="font-size:15.5px;line-height:1.4;letter-spacing:-.006em;">Friday works, but could we make it a bit later?</div>
+          </div>
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="oklch(70% .012 65)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+        </div>
+        <div class="rcard">
+          <div style="flex:1;">
+            <div style="font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--accent);margin-bottom:5px;">Take the offer</div>
+            <div style="font-size:15.5px;line-height:1.4;letter-spacing:-.006em;">Could we push to Saturday? This week got away from me.</div>
+          </div>
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="oklch(70% .012 65)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+        </div>
+      </div>
+
+      <div style="display:flex;align-items:center;justify-content:center;gap:8px;padding:20px 20px 0 20px;color:oklch(58% .012 65);">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h11M15 4l3 3-3 3"/><path d="M20 17H9M9 14l-3 3 3 3"/></svg>
+        <div style="font-size:13px;font-weight:600;">Pick one, then remix it before sending</div>
+      </div>
+
+      <div style="flex:1;"></div>
+
+      <div style="display:flex;align-items:center;justify-content:center;padding:0 20px 30px 20px;">
+        <div style="display:flex;align-items:center;justify-content:center;height:48px;padding:0 20px;border-radius:24px;font-size:14px;font-weight:700;color:oklch(45% .014 62);">Write my own instead</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function () {
+  var TONES = ['Concise', 'Warm', 'Formal'];
+  var BEATS = [
+    { label: 'opening', optional: true,
+      alts: ['Sorry for the slow reply.', 'Sorry I went quiet!', 'Apologies for the delay.'] },
+    { label: 'the reason', optional: true,
+      alts: ['Busy week here.', "This week's been mental.", 'It has been a busy week.'] },
+    { label: 'the answer', optional: false,
+      alts: ['Friday still works.', 'Friday still works for me.', 'Friday remains convenient.'] },
+    { label: 'sign-off', optional: true,
+      alts: ['See you then.', 'See you Friday!', 'I will see you then.'] }
+  ];
+
+  var picks = [1, 1, 1, 1];
+  var skipped = [false, false, false, false];
+  var open = null;
+
+  var elTones = document.getElementById('tones');
+  var elMsg = document.getElementById('msg');
+  var elLeft = document.getElementById('left-out');
+  var elZone = document.getElementById('zone');
+  var elCopy = document.getElementById('copy');
+  var elReplace = document.getElementById('replace');
+
+  function kept() {
+    var out = [];
+    for (var i = 0; i < BEATS.length; i++) { if (!skipped[i]) out.push(i); }
+    return out;
+  }
+
+  function uniformTone() {
+    var k = kept();
+    if (!k.length) return -1;
+    var first = picks[k[0]];
+    for (var i = 0; i < k.length; i++) { if (picks[k[i]] !== first) return -1; }
+    return first;
+  }
+
+  function el(tag, cls, text) {
+    var n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text !== undefined) n.textContent = text;
+    return n;
+  }
+
+  function renderTones() {
+    elTones.innerHTML = '';
+    var u = uniformTone();
+    TONES.forEach(function (name, j) {
+      var b = el('button', 'pill' + (u === j ? ' on' : ''), name);
+      b.type = 'button';
+      b.onclick = function () {
+        picks = BEATS.map(function () { return j; });
+        open = null;
+        render();
+      };
+      elTones.appendChild(b);
+    });
+    if (u === -1) {
+      var m = el('div', null, 'Mixed');
+      m.style.cssText = 'display:flex;align-items:center;padding:0 14px;height:46px;border-radius:23px;background:oklch(93% .008 75);color:oklch(50% .012 65);font-size:13px;font-weight:700;';
+      elTones.appendChild(m);
+    }
+  }
+
+  function renderMessage() {
+    elMsg.innerHTML = '';
+    kept().forEach(function (idx) {
+      var s = el('span', 'seg' + (open === idx ? ' on' : ''), BEATS[idx].alts[picks[idx]]);
+      s.onclick = function () { open = (open === idx) ? null : idx; render(); };
+      elMsg.appendChild(s);
+    });
+  }
+
+  function renderLeftOut() {
+    elLeft.innerHTML = '';
+    var any = false;
+    BEATS.forEach(function (b, idx) {
+      if (!skipped[idx]) return;
+      any = true;
+      var c = el('button', 'chip');
+      c.type = 'button';
+      c.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>';
+      c.appendChild(document.createTextNode(b.label));
+      c.onclick = function () {
+        // Adopt the tone the rest agree on, so a stale phrasing never
+        // reappears inside a message that has since been retoned.
+        var agreed = uniformTone();
+        skipped[idx] = false;
+        if (agreed !== -1) picks[idx] = agreed;
+        open = null;
+        render();
+      };
+      elLeft.appendChild(c);
+    });
+    if (any) {
+      elLeft.insertBefore(
+        (function () {
+          var l = el('div', null, 'Left out');
+          l.style.cssText = 'font-size:12px;font-weight:600;color:' + 'oklch(60% .012 65)';
+          return l;
+        })(),
+        elLeft.firstChild
+      );
+    }
+    elLeft.style.display = any ? 'flex' : 'none';
+  }
+
+  function renderZone() {
+    elZone.innerHTML = '';
+    if (open === null) {
+      var hint = el('div');
+      hint.style.cssText = 'display:flex;align-items:center;justify-content:center;gap:9px;height:100%;padding-bottom:40px;color:oklch(62% .012 65);';
+      hint.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3H5a2 2 0 0 0-2 2v4M15 3h4a2 2 0 0 1 2 2v4M21 15v4a2 2 0 0 1-2 2h-4M3 15v4a2 2 0 0 0 2 2h4"/></svg><div style="font-size:13.5px;font-weight:500;">Tap any highlighted part to change it</div>';
+      elZone.appendChild(hint);
+      return;
+    }
+
+    var beat = BEATS[open];
+    var card = el('div');
+    card.style.cssText = 'background:var(--card);border:1px solid oklch(90% .008 75);border-radius:18px;padding:8px 12px 12px 12px;box-shadow:0 2px 4px oklch(60% .02 70 / .05),0 12px 28px oklch(60% .02 70 / .08);';
+
+    var head = el('div');
+    head.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:0 0 6px 8px;';
+    var lab = el('div', 'lbl', beat.label);
+    var close = el('button');
+    close.type = 'button';
+    close.style.cssText = 'display:flex;align-items:center;justify-content:center;width:40px;height:40px;border:none;background:transparent;color:oklch(55% .012 65);cursor:pointer;';
+    close.innerHTML = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>';
+    close.onclick = function () { open = null; render(); };
+    head.appendChild(lab);
+    head.appendChild(close);
+    card.appendChild(head);
+
+    var list = el('div');
+    list.style.cssText = 'display:flex;flex-direction:column;gap:5px;';
+    beat.alts.forEach(function (text, j) {
+      var row = el('div', 'opt' + (picks[open] === j ? ' on' : ''));
+      row.innerHTML =
+        '<span class="dot"></span><div><div class="opt-tone">' + TONES[j] +
+        '</div><div class="opt-text"></div></div>';
+      row.querySelector('.opt-text').textContent = text;
+      row.onclick = function () { picks[open] = j; open = null; render(); };
+      list.appendChild(row);
+    });
+
+    if (beat.optional) {
+      var skip = el('button');
+      skip.type = 'button';
+      skip.style.cssText = 'display:flex;align-items:center;gap:9px;min-height:44px;padding:0 12px;border:none;background:transparent;color:oklch(52% .012 65);font:600 14px Manrope,sans-serif;cursor:pointer;';
+      skip.innerHTML = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/></svg>';
+      skip.appendChild(document.createTextNode('Leave this out'));
+      skip.onclick = function () { skipped[open] = true; open = null; render(); };
+      list.appendChild(skip);
+    }
+
+    card.appendChild(list);
+    elZone.appendChild(card);
+  }
+
+  function flash(btn, label, colour) {
+    var old = btn.textContent;
+    var oldBg = btn.style.background;
+    btn.textContent = label;
+    if (colour) btn.style.background = colour;
+    setTimeout(function () { btn.textContent = old; btn.style.background = oldBg; }, 1400);
+  }
+
+  elCopy.onclick = function () { flash(elCopy, 'Copied'); };
+  elReplace.onclick = function () { flash(elReplace, 'Replaced', 'oklch(48% 0.13 155)'); };
+
+  function render() { renderTones(); renderMessage(); renderLeftOut(); renderZone(); }
+  render();
+})();
+</script>
+</body>
+</html>

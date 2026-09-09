@@ -1,0 +1,6 @@
+# Copy to local.properties (which is gitignored) and fill in.
+# sdk.dir is written automatically by Android Studio.
+sdk.dir=C\:\Users\YOU\AppData\Local\Android\Sdk
+
+# Prototype only. See the security note in README.md before shipping anything.
+ANTHROPIC_API_KEY=sk-ant-...

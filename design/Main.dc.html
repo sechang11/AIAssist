@@ -1,0 +1,259 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap">
+  <style>
+    body { margin: 0; font-family: 'Manrope', ui-sans-serif, system-ui, sans-serif; }
+    a { color: #4f46e5; } a:hover { color: #3730a3; }
+    * { box-sizing: border-box; }
+    button { font-family: inherit; }
+  </style>
+</helmet>
+
+<div style="width: 390px; height: 844px; background: oklch(97.5% 0.005 85); color: oklch(24% 0.015 60); display: flex; flex-direction: column; overflow: hidden;">
+
+  <div style="display: flex; align-items: center; gap: 6px; padding: 6px 16px 4px 8px;">
+    <div style="display: flex; align-items: center; justify-content: center; width: 44px; height: 44px;">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="oklch(40% 0.015 60)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"></path></svg>
+    </div>
+    <div style="font-size: 19px; font-weight: 700; letter-spacing: -0.01em;">Remix</div>
+  </div>
+
+  <div style="padding: 2px 20px 12px 20px;">
+    <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: oklch(60% 0.012 65); margin-bottom: 2px;">You wrote</div>
+    <div style="font-size: 13px; line-height: 1.45; color: oklch(56% 0.012 65); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">hey so sorry i didnt get back to you sooner, this week has been mental. friday still works for me if thats ok?</div>
+  </div>
+
+  <div style="display: flex; gap: 8px; padding: 0 20px 14px 20px;">
+    <sc-for list="{{tones}}" as="t" hint-placeholder-count="3">
+      <button type="button" onClick="{{ t.pick }}" style="flex: 1; height: 46px; border-radius: 23px; border: 1.5px solid {{t.border}}; background: {{t.bg}}; color: {{t.fg}}; font-size: 14px; font-weight: {{t.weight}}; letter-spacing: -0.005em; cursor: pointer;">{{ t.name }}</button>
+    </sc-for>
+    <sc-if value="{{mixed}}" hint-placeholder-val="{{ false }}">
+      <div style="display: flex; align-items: center; padding: 0 14px; height: 46px; border-radius: 23px; background: oklch(93% 0.008 75); color: oklch(50% 0.012 65); font-size: 13px; font-weight: 700;">Mixed</div>
+    </sc-if>
+  </div>
+
+  <div style="margin: 0 20px; background: oklch(100% 0 0); border: 1px solid oklch(92% 0.006 75); border-radius: 18px; padding: 14px 15px 18px 15px; box-shadow: 0 1px 2px oklch(60% 0.02 70 / 0.06), 0 8px 20px oklch(60% 0.02 70 / 0.05);">
+    <div style="font-size: 17px; line-height: 2.45; letter-spacing: -0.006em; text-wrap: pretty;">
+      <sc-for list="{{segments}}" as="seg" hint-placeholder-count="4">
+        <span onClick="{{ seg.tap }}" style="background: {{seg.bg}}; box-shadow: inset 0 0 0 {{seg.ring}} {{seg.ringColor}}; border-radius: 8px; padding: 9px 7px; margin-right: 3px; cursor: pointer; -webkit-box-decoration-break: clone; box-decoration-break: clone;">{{ seg.text }}</span>
+      </sc-for>
+    </div>
+  </div>
+
+  <sc-if value="{{hasSkipped}}" hint-placeholder-val="{{ false }}">
+    <div style="display: flex; align-items: center; gap: 8px; padding: 12px 20px 0 20px;">
+      <div style="font-size: 12px; font-weight: 600; color: oklch(60% 0.012 65);">Left out</div>
+      <sc-for list="{{skippedChips}}" as="chip" hint-placeholder-count="1">
+        <button type="button" onClick="{{ chip.restore }}" style="display: flex; align-items: center; gap: 6px; height: 40px; padding: 0 14px; border-radius: 20px; border: 1px dashed oklch(80% 0.01 70); background: transparent; color: oklch(45% 0.012 65); font-size: 12.5px; font-weight: 600; cursor: pointer;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></svg>
+          {{ chip.label }}
+        </button>
+      </sc-for>
+    </div>
+  </sc-if>
+
+  <div style="flex: 1; padding: 14px 20px 0 20px; min-height: 0; overflow-y: auto;">
+    <sc-if value="{{picker}}" hint-placeholder-val="{{ false }}">
+      <div style="background: oklch(100% 0 0); border: 1px solid oklch(90% 0.008 75); border-radius: 18px; padding: 8px 12px 12px 12px; box-shadow: 0 2px 4px oklch(60% 0.02 70 / 0.05), 0 12px 28px oklch(60% 0.02 70 / 0.08);">
+        <div style="display: flex; align-items: center; justify-content: space-between; padding: 0 0 6px 8px;">
+          <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: oklch(60% 0.012 65);">{{ picker.label }}</div>
+          <button type="button" onClick="{{ picker.close }}" style="display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border: none; background: transparent; color: oklch(55% 0.012 65); cursor: pointer;">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"></path></svg>
+          </button>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 5px;">
+          <sc-for list="{{picker.options}}" as="o" hint-placeholder-count="3">
+            <div onClick="{{ o.pick }}" style="display: flex; align-items: center; gap: 11px; min-height: 52px; padding: 8px 12px; border-radius: 13px; background: {{o.bg}}; box-shadow: inset 0 0 0 1.5px {{o.border}}; cursor: pointer;">
+              <span style="flex: none; width: 17px; height: 17px; border-radius: 50%; background: {{o.dotFill}}; box-shadow: inset 0 0 0 2px {{o.dotRing}};"></span>
+              <div>
+                <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: {{o.toneColor}}; margin-bottom: 2px;">{{ o.tone }}</div>
+                <div style="font-size: 15px; line-height: 1.35; font-weight: {{o.weight}}; letter-spacing: -0.006em;">{{ o.text }}</div>
+              </div>
+            </div>
+          </sc-for>
+
+          <sc-if value="{{picker.optional}}" hint-placeholder-val="{{ true }}">
+            <button type="button" onClick="{{ picker.skip }}" style="display: flex; align-items: center; gap: 9px; min-height: 44px; padding: 0 12px; border: none; background: transparent; color: oklch(52% 0.012 65); font-size: 14px; font-weight: 600; cursor: pointer;">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path></svg>
+              Leave this out
+            </button>
+          </sc-if>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{noPicker}}" hint-placeholder-val="{{ true }}">
+      <div style="display: flex; align-items: center; justify-content: center; gap: 9px; height: 100%; padding-bottom: 40px; color: oklch(62% 0.012 65);">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3H5a2 2 0 0 0-2 2v4M15 3h4a2 2 0 0 1 2 2v4M21 15v4a2 2 0 0 1-2 2h-4M3 15v4a2 2 0 0 0 2 2h4"></path></svg>
+        <div style="font-size: 13.5px; font-weight: 500;">Tap any highlighted part to change it</div>
+      </div>
+    </sc-if>
+  </div>
+
+  <div style="display: flex; align-items: center; gap: 10px; padding: 12px 20px 26px 20px; border-top: 1px solid oklch(92% 0.006 75); background: oklch(99% 0.004 85);">
+    <button type="button" onClick="{{ copy }}" style="height: 52px; padding: 0 20px; border-radius: 26px; border: 1.5px solid oklch(88% 0.008 75); background: transparent; color: oklch(38% 0.014 62); font-size: 15px; font-weight: 700; cursor: pointer;">{{ copyLabel }}</button>
+    <button type="button" onClick="{{ replace }}" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; height: 52px; border-radius: 26px; border: none; background: {{replaceBg}}; color: oklch(100% 0 0); font-size: 16px; font-weight: 700; letter-spacing: -0.005em; cursor: pointer;">
+      <sc-if value="{{replaced}}" hint-placeholder-val="{{ false }}">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"></path></svg>
+      </sc-if>
+      {{ replaceLabel }}
+    </button>
+  </div>
+
+</div>
+</x-dc>
+
+<script data-dc-script data-props='{"accent":{"editor":"color","default":"#4f46e5","options":["#4f46e5","#0f766e","#a1521a","#b0184a"],"section":"Theme"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { picks: [1, 1, 1, 1], skipped: [false, false, false, false], open: null, done: null };
+  }
+
+  beats() {
+    return [
+      { label: 'opening', optional: true,
+        alts: ['Sorry for the slow reply.', 'Sorry I went quiet!', 'Apologies for the delay.'] },
+      { label: 'the reason', optional: true,
+        alts: ['Busy week here.', "This week's been mental.", 'It has been a busy week.'] },
+      { label: 'the answer', optional: false,
+        alts: ['Friday still works.', 'Friday still works for me.', 'Friday remains convenient.'] },
+      { label: 'sign-off', optional: true,
+        alts: ['See you then.', 'See you Friday!', 'I will see you then.'] }
+    ];
+  }
+
+  uniformTone(picks, skipped, beats) {
+    var kept = [];
+    for (var i = 0; i < beats.length; i++) { if (!skipped[i]) kept.push(i); }
+    if (!kept.length) return -1;
+    var first = picks[kept[0]];
+    for (var k = 0; k < kept.length; k++) { if (picks[kept[k]] !== first) return -1; }
+    return first;
+  }
+
+  renderVals() {
+    var self = this;
+    var accent = this.props.accent || '#4f46e5';
+    var toneNames = ['Concise', 'Warm', 'Formal'];
+    var beats = this.beats();
+    var picks = this.state.picks;
+    var skipped = this.state.skipped;
+    var open = this.state.open;
+    var done = this.state.done;
+
+    var soft = 'color-mix(in oklab, ' + accent + ' 9%, white)';
+    var strong = 'color-mix(in oklab, ' + accent + ' 20%, white)';
+    var faint = 'color-mix(in oklab, ' + accent + ' 6%, white)';
+    var edge = 'color-mix(in oklab, ' + accent + ' 45%, white)';
+
+    var uniform = this.uniformTone(picks, skipped, beats);
+
+    var kept = [];
+    for (var i = 0; i < beats.length; i++) { if (!skipped[i]) kept.push(i); }
+
+    var tones = toneNames.map(function (name, j) {
+      var on = uniform === j;
+      return {
+        name: name,
+        bg: on ? accent : 'transparent',
+        fg: on ? '#ffffff' : 'oklch(38% 0.014 62)',
+        border: on ? accent : 'oklch(87% 0.008 75)',
+        weight: on ? '700' : '600',
+        pick: function () {
+          self.setState({ picks: beats.map(function () { return j; }), open: null, done: null });
+        }
+      };
+    });
+
+    var segments = kept.map(function (idx) {
+      var active = open === idx;
+      return {
+        text: beats[idx].alts[picks[idx]],
+        bg: active ? strong : soft,
+        ring: active ? '1.5px' : '0px',
+        ringColor: active ? edge : 'transparent',
+        tap: function () { self.setState({ open: active ? null : idx, done: null }); }
+      };
+    });
+
+    var skippedChips = [];
+    beats.forEach(function (b, idx) {
+      if (!skipped[idx]) return;
+      skippedChips.push({
+        label: b.label,
+        restore: function () {
+          var nextSkipped = self.state.skipped.slice();
+          nextSkipped[idx] = false;
+          // Bringing a beat back must not drop a stale phrasing into a message
+          // the reader has since retoned. Adopt the tone the rest agree on.
+          var nextPicks = self.state.picks.slice();
+          var agreed = self.uniformTone(nextPicks, self.state.skipped, beats);
+          if (agreed !== -1) nextPicks[idx] = agreed;
+          self.setState({ skipped: nextSkipped, picks: nextPicks, open: null, done: null });
+        }
+      });
+    });
+
+    var picker = null;
+    if (open !== null && beats[open]) {
+      var beat = beats[open];
+      picker = {
+        label: beat.label,
+        optional: beat.optional,
+        close: function () { self.setState({ open: null }); },
+        skip: function () {
+          var next = self.state.skipped.slice();
+          next[open] = true;
+          self.setState({ skipped: next, open: null, done: null });
+        },
+        options: beat.alts.map(function (text, j) {
+          var on = picks[open] === j;
+          return {
+            tone: toneNames[j],
+            text: text,
+            bg: on ? faint : 'transparent',
+            border: on ? edge : 'oklch(93% 0.006 75)',
+            dotFill: on ? accent : 'transparent',
+            dotRing: on ? accent : 'oklch(82% 0.01 70)',
+            toneColor: on ? accent : 'oklch(62% 0.012 65)',
+            weight: on ? '600' : '500',
+            pick: function () {
+              var next = self.state.picks.slice();
+              next[open] = j;
+              self.setState({ picks: next, open: null, done: null });
+            }
+          };
+        })
+      };
+    }
+
+    return {
+      accent: accent,
+      tones: tones,
+      segments: segments,
+      skippedChips: skippedChips,
+      hasSkipped: skippedChips.length > 0,
+      mixed: uniform === -1,
+      picker: picker,
+      noPicker: picker === null,
+      copyLabel: done === 'copy' ? 'Copied' : 'Copy',
+      replaceLabel: done === 'replace' ? 'Replaced' : 'Replace',
+      replaced: done === 'replace',
+      replaceBg: done === 'replace' ? 'oklch(48% 0.13 155)' : accent,
+      copy: function () { self.setState({ done: 'copy', open: null }); },
+      replace: function () { self.setState({ done: 'replace', open: null }); }
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,39 @@
+{
+  "artboards": [
+    { "file": "Entry.dc.html", "x": 0, "y": 0, "w": 390, "h": 844, "title": "1 · Getting in" },
+    { "file": "Main.dc.html", "x": 490, "y": 0, "w": 390, "h": 844, "title": "2 · Remix (live)", "is_interactive": true },
+    { "file": "Keyboard.dc.html", "x": 980, "y": 0, "w": 390, "h": 560, "title": "3 · Keyboard" },
+    { "file": "Reply.dc.html", "x": 1470, "y": 0, "w": 390, "h": 844, "title": "4 · Replies" }
+  ],
+  "annotations": [
+    {
+      "id": "entry-note",
+      "x": 0,
+      "y": -168,
+      "w": 390,
+      "text": "1 · How you get in\n\nSelect what you already wrote, in any app, and tap Remix in the toolbar Android shows anyway. No accessibility service, no overlay permission, nothing for Play review to argue with."
+    },
+    {
+      "id": "main-note",
+      "x": 490,
+      "y": -168,
+      "w": 390,
+      "text": "2 · The one that matters — this artboard is live, try it\n\nThe message is the interface. Tap a tone to swap all of it; tap any highlighted phrase to change that beat alone. You read one message that changes under your thumb, instead of comparing three drafts and picking."
+    },
+    {
+      "id": "keyboard-note",
+      "x": 980,
+      "y": -168,
+      "w": 390,
+      "text": "3 · Phase 2, as a keyboard\n\nSame idea with no app switch. The compose field carries the highlighted parts, the strip above the keys carries the tones. This is where it stops feeling like a detour."
+    },
+    {
+      "id": "reply-note",
+      "x": 1470,
+      "y": -168,
+      "w": 390,
+      "text": "4 · Phase 3, suggesting replies\n\nThree different answers rather than three tones of one answer; the tones come after, in screen 2. Reading the message you are replying to needs notification access, so the app says where it got it before showing anything, with the off switch in reach."
+    }
+  ],
+  "launch": { "view": "canvas" }
+}
