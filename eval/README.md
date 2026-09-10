@@ -121,7 +121,19 @@ behaviour and therefore the kind of thing training moves.
 ## Keeping it honest
 
 `pipeline.py` and the app's `BeatSplitter` plus `GridBuilder` are the same
-algorithm in two languages. If you change one, change the other.
+algorithm in two languages, and the prompt has to be identical down to the line
+breaks, because a student trained on one wording and prompted with another
+loses part of what it learned.
+
+```bash
+python eval/check_parity.py
+```
+
+That compares the prompt pinned inside the Kotlin test against the one this
+directory scores, runs the Python splitter over the cases the Kotlin tests
+assert, and checks the messages file is well formed. It exits non-zero on a
+mismatch, so it belongs in a hook. `PromptParityTest` guards the same text from
+the Kotlin side; neither check sees both languages alone.
 
 Add your own messages as you hit failures in real use. A test set that grows out
 of actual mistakes is worth more than one written in advance, this one included.
