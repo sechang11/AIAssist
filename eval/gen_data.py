@@ -254,8 +254,26 @@ def stage_beats(model, limit, workers):
 
 # ---- stage 3: pack for training --------------------------------------------
 
+# Even told not to, the teacher sometimes writes an example rather than a
+# message: "Dear [Partner's Name], regret to inform...". Training on those
+# teaches the student to emit placeholders, so they go before packing.
+_PLACEHOLDER = re.compile(
+    r"\[[^\]]{0,40}\]|<[^>]{0,40}>|\b(your name|recipient|insert|placeholder|lorem)\b",
+    re.IGNORECASE,
+)
+
+
 def stage_pack():
     beats = [json.loads(l) for l in (DATA / "beats.jsonl").open(encoding="utf-8")]
+
+    before = len(beats)
+    beats = [
+        b for b in beats
+        if not _PLACEHOLDER.search(b["source"])
+        and not any(_PLACEHOLDER.search(a) for a in b["alternatives"])
+    ]
+    print(f"dropped {before - len(beats)} beats containing placeholders")
+
     random.Random(11).shuffle(beats)
     split = max(1, int(len(beats) * 0.05))
     holdout, train = beats[:split], beats[split:]
