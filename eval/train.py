@@ -86,8 +86,18 @@ def main():
         seed=13,
     )
 
+    # Load onto the GPU explicitly rather than letting accelerate decide. Left
+    # to itself it offloaded part of the 1.5B to CPU, which wraps the model's
+    # forward in a functools.partial, which TRL's chunked-loss patch then
+    # crashes on. Pinning the device sidesteps the whole chain.
+    model = AutoModelForCausalLM.from_pretrained(
+        args.base,
+        torch_dtype=torch.bfloat16,
+        device_map={"": 0} if torch.cuda.is_available() else None,
+    )
+
     trainer = SFTTrainer(
-        model=args.base,
+        model=model,
         args=config,
         train_dataset=dataset,
         peft_config=lora,
