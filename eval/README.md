@@ -20,8 +20,14 @@ actually uses.
 | 0.5B | split | 100% | 100% | 88% | 36% | 92% | 30% |
 | 7B | split | 100% | 100% | 90% | 88% | 96% | 68% |
 | 1.5B | split | 100% | 100% | 92% | 88% | 98% | **74%** |
+| 14B | split | 100% | 100% | 90% | 82% | 98% | **74%** |
 
-Three things worth reading off that.
+Four things worth reading off that.
+
+**There is a ceiling near 74% and parameters do not move it.** The 14B is
+twenty-eight times the size of the 0.5B and nine times the 1.5B, and it scores
+what the 1.5B scores, at thirty times the latency. Whatever the last 26% is, it
+is not a capability problem, so no amount of model shopping fixes it.
 
 **Hard facts sit at 100% for every split run.** That is the guarantee in
 `pipeline.build_grid`, not the models being careful: a rewrite that loses a day,
