@@ -122,22 +122,47 @@ _ALWAYS_HARD = {
 }
 
 
+def _is_load_bearing(token):
+    if any(c.isdigit() for c in token):
+        return True
+    if token.lower() in _ALWAYS_HARD:
+        return True
+    if not token[:1].isupper():
+        return False
+    # A lone capital is usually a label the reader needs: room B, gate C,
+    # plan A. "I" is the one that never is.
+    if len(token) <= 2:
+        return token != "I"
+    return token.lower() != "the"
+
+
 def lost_tokens(fragment: str, rewrite: str):
     """Which of the fragment's load-bearing tokens went missing. Days, times,
-    numbers and names; ordinary words are meant to change."""
-    hard = []
+    numbers and names; ordinary words are meant to change.
+
+    Short letter tokens are matched on word boundaries, everything else as a
+    substring. Substring matching alone made single letters meaningless,
+    because "a" occurs in almost any sentence, so "in room B not room A" could
+    lose the A and still be judged intact. Numbers keep substring matching even
+    when short, since "11" really is preserved inside "11am", and a bare digit
+    is specific enough not to match by accident.
+    """
+    lower = rewrite.lower()
+    missing = []
     for token in _TOKEN.findall(fragment):
         stripped = token.strip(".")
-        if not stripped:
+        if not stripped or not _is_load_bearing(stripped):
             continue
-        if (
-            any(c.isdigit() for c in stripped)
-            or stripped.lower() in _ALWAYS_HARD
-            or (stripped[:1].isupper() and len(stripped) > 2 and stripped.lower() != "the")
-        ):
-            hard.append(stripped)
-    lower = rewrite.lower()
-    return [t for t in hard if t.lower() not in lower]
+        if len(stripped) <= 2 and stripped.isalpha():
+            present = re.search(
+                r"(?<![A-Za-z0-9])" + re.escape(stripped.lower()) + r"(?![A-Za-z0-9])",
+                lower,
+            ) is not None
+        else:
+            present = stripped.lower() in lower
+        if not present:
+            missing.append(stripped)
+    return missing
 
 
 def build_grid(whole: str, ask, tones=None, retry=True):

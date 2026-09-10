@@ -190,6 +190,32 @@ class LostTokenTest {
     fun `a kept fact is not reported, whatever the case`() {
         assertEquals(emptyList<String>(), BeatSplitter.lostTokens("friday works", "Friday is fine"))
     }
+
+    @Test
+    fun `a lone capital is a label, and substring matching used to lose it`() {
+        // "room B not room A" losing the A destroys the message, but "a" occurs
+        // in nearly any sentence, so a substring check always thought it kept it.
+        assertEquals(
+            listOf("B", "A"),
+            BeatSplitter.lostTokens("its in room B not room A", "its in room 1 not room 2"),
+        )
+        assertEquals(
+            emptyList<String>(),
+            BeatSplitter.lostTokens("its in room B not room A", "the meeting is in room B, not room A"),
+        )
+    }
+
+    @Test
+    fun `I is never load-bearing`() {
+        assertEquals(emptyList<String>(), BeatSplitter.lostTokens("I will be late", "running late"))
+    }
+
+    @Test
+    fun `a short number still matches inside a longer one`() {
+        // Word boundaries are for letters. "before 11" is kept by "before 11am".
+        assertEquals(emptyList<String>(), BeatSplitter.lostTokens("before 11", "before 11am"))
+        assertEquals(listOf("11"), BeatSplitter.lostTokens("before 11", "before eleven"))
+    }
 }
 
 class BeatParserTest {

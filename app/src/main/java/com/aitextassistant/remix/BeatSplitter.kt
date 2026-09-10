@@ -80,14 +80,31 @@ object BeatSplitter {
         return TOKEN.findAll(fragment)
             .map { it.value.trim('.') }
             .filter { it.isNotEmpty() && isLoadBearing(it) }
-            .filter { !haystack.contains(it.lowercase()) }
+            .filterNot { survives(it, haystack) }
             .toList()
     }
 
     private fun isLoadBearing(token: String): Boolean = when {
         token.any { it.isDigit() } -> true
         token.lowercase() in ALWAYS_HARD -> true
-        token.first().isUpperCase() && token.length > 2 && !token.equals("the", true) -> true
-        else -> false
+        !token.first().isUpperCase() -> false
+        // A lone capital is usually a label the reader needs: room B, gate C,
+        // plan A. "I" is the one that never is.
+        token.length <= 2 -> token != "I"
+        else -> !token.equals("the", ignoreCase = true)
+    }
+
+    /**
+     * Short letter tokens are matched on word boundaries, everything else as a
+     * substring. Substring matching alone made single letters meaningless,
+     * because "a" occurs in almost any sentence, so "in room B not room A"
+     * could lose the A and still be judged intact. Numbers keep substring
+     * matching even when short, since "11" really is preserved inside "11am".
+     */
+    private fun survives(token: String, haystack: String): Boolean {
+        val needle = token.lowercase()
+        if (token.length > 2 || !token.all { it.isLetter() }) return haystack.contains(needle)
+        return Regex("(?<![a-z0-9])" + Regex.escape(needle) + "(?![a-z0-9])")
+            .containsMatchIn(haystack)
     }
 }
