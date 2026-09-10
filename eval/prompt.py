@@ -1,76 +1,102 @@
 """The prompt under test.
 
-This is a copy of Prompt.kt. They have to stay in step or the eval is measuring
-something the app does not do. If you change one, change the other.
+Keep this in step with Prompt.kt or the eval stops measuring what the app does.
+
+Three rounds against Qwen 1.5B and 7B, each fixing something the eval exposed:
+
+  v1  The schema example wrote {"tones":["..."]} and the 7B copied the literal
+      "..." into its answer. And `alternatives` was unbounded, so the 1.5B
+      returned one alternative per slot: a segmentation, not a grid.
+
+  v2  Shape fixed by pinning minItems and maxItems, and by not asking for the
+      tone names back. Validity went to 100% for both. But the models then
+      copied the *content* of the new example: nearly every answer opened
+      "hey" / "hi there" / "Good morning", verbatim from the sample, then
+      padded with apology and sign-off filler while deleting the actual
+      message. A request to move a meeting from 6 to 7:30 came back as "hey
+      sure thing just in case thanks".
+
+  v3  No example at all. The schema already enforces shape, so the example was
+      only ever offering content to plagiarise. Prompt cut to roughly a third,
+      because small models drown in rules, and pointed hard at the two observed
+      failures: keep the writer's own words, and invent no beats.
 """
 
 TONES = ["Concise", "Warm", "Formal"]
 
-SYSTEM = """You turn a message someone has already written into a grid of alternative
-phrasings, so they can pick a whole version or mix beats from several.
 
-Break the message into 2 to 6 slots. A slot is one beat: a greeting, an
-apology, the core answer, a caveat, a sign-off. List slots in the order
-they appear in the finished message. Give every slot exactly one
-alternative per tone, in the order the tones are given.
+def system(tones=None) -> str:
+    tones = tones or TONES
+    numbered = "; ".join(f"alternative {i + 1} is {t.lower()}" for i, t in enumerate(tones))
+    return f"""You rewrite one short personal message into alternative phrasings.
 
-Two constraints make the grid usable:
-- Reading alternative i from every slot, top to bottom, must produce a
-  natural message in tone i.
-- Every other combination must work too. The reader will pair alternative 0
-  of one slot with alternative 2 of the next, so no alternative may depend
-  on the wording of a neighbour or repeat something a neighbour says.
+Split it into 2 to 6 slots. A slot is one beat of the message. Keep them in the
+order the writer wrote them.
 
-Hold the writer to what they actually wrote:
-- Keep their meaning, facts, names, times and commitments exactly. Never add
-  information, never invent a reason, never soften a no into a maybe.
-- Stay close to the original length. This is a message sent from a phone.
-- Match their register unless a tone asks otherwise. If they wrote in
-  lowercase with no full stops, the casual column stays that way.
-- Set optional to true only when the message still reads correctly with that
-  slot removed. Greetings, pleasantries and sign-offs usually qualify. The
-  core content does not.
+Give every slot exactly {len(tones)} alternatives: {numbered}.
 
-Each alternative is one plain-text fragment: no surrounding quotes, no
-markdown, no leading or trailing space. Fragments are joined with a single
-space, so never begin one with punctuation.
+Reuse the writer's own words wherever you can. Every name, date, time, number
+and place in their message must appear in all {len(tones)} alternatives of the slot
+that carries it.
 
-Reply with the JSON object alone. No preamble, no code fence.
+Invent nothing. Do not add a greeting, apology, pleasantry, reassurance or
+sign-off that is not already in their message. If they wrote two beats, return
+two slots.
 
-{"tones":["..."],"slots":[{"id":"s1","label":"short name for this beat","optional":false,"alternatives":["...","..."]}]}"""
+Never turn a no into a maybe, or a maybe into a yes. Keep every condition.
+
+Match their register. Lowercase with no full stops stays lowercase with no full
+stops.
+
+Alternatives within a slot must differ from each other, and must not repeat what
+a neighbouring slot says. They are joined with a single space, so start none of
+them with punctuation.
+
+Mark a slot optional only if deleting it still leaves a correct message."""
 
 
 def user(original: str, tones=None) -> str:
     tones = tones or TONES
     return (
-        "Tones, in order: " + ", ".join(tones) + "\n\n"
-        "Message to rework, between the markers:\n"
-        "<<<MESSAGE\n" + original + "\nMESSAGE"
+        "Message:\n<<<\n" + original + "\n>>>\n\n"
+        "Split the message above into slots, using its own words. "
+        "Tones in order: " + ", ".join(tones) + "."
     )
 
 
-# A JSON schema for backends that support constrained decoding. Ollama takes
-# this as the `format` field; llama.cpp takes a GBNF grammar compiled from it.
-# Forcing the shape at the sampler removes the failure mode small models hit
-# most often, which is malformed JSON rather than bad writing.
-SCHEMA = {
-    "type": "object",
-    "required": ["tones", "slots"],
-    "properties": {
-        "tones": {"type": "array", "items": {"type": "string"}},
-        "slots": {
-            "type": "array",
-            "minItems": 2,
-            "items": {
-                "type": "object",
-                "required": ["id", "label", "optional", "alternatives"],
-                "properties": {
-                    "id": {"type": "string"},
-                    "label": {"type": "string"},
-                    "optional": {"type": "boolean"},
-                    "alternatives": {"type": "array", "items": {"type": "string"}},
+def schema(tones=None):
+    """Constrained decoding. Ollama takes this as `format`; llama.cpp compiles
+    an equivalent GBNF grammar. Pinning the alternatives count is what stops a
+    small model returning a segmentation instead of a grid, and it means the
+    prompt needs no example, which is what stopped them copying one."""
+    n = len(tones or TONES)
+    return {
+        "type": "object",
+        "required": ["slots"],
+        "properties": {
+            "slots": {
+                "type": "array",
+                "minItems": 2,
+                "maxItems": 6,
+                "items": {
+                    "type": "object",
+                    "required": ["id", "label", "optional", "alternatives"],
+                    "properties": {
+                        "id": {"type": "string"},
+                        "label": {"type": "string"},
+                        "optional": {"type": "boolean"},
+                        "alternatives": {
+                            "type": "array",
+                            "minItems": n,
+                            "maxItems": n,
+                            "items": {"type": "string"},
+                        },
+                    },
                 },
             },
         },
-    },
-}
+    }
+
+
+SYSTEM = system()
+SCHEMA = schema()

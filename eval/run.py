@@ -21,7 +21,7 @@ import urllib.request
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
-from prompt import SCHEMA, SYSTEM, TONES, user  # noqa: E402
+from prompt import TONES, schema, system, user  # noqa: E402
 
 HERE = Path(__file__).parent
 
@@ -37,14 +37,14 @@ def call_ollama(model: str, text: str, use_schema: bool, host: str) -> str:
         "stream": False,
         "options": {"temperature": 0.7, "num_predict": 900},
         "messages": [
-            {"role": "system", "content": SYSTEM},
+            {"role": "system", "content": system()},
             {"role": "user", "content": user(text)},
         ],
     }
     # Constrained decoding. Newer Ollama takes a full schema; older builds only
     # understand "json". Either beats nothing, so fall back rather than fail.
     if use_schema:
-        body["format"] = SCHEMA
+        body["format"] = schema()
 
     def post(payload):
         request = urllib.request.Request(
@@ -73,7 +73,7 @@ def call_anthropic(model: str, text: str) -> str:
     response = client.messages.create(
         model=model,
         max_tokens=8000,
-        system=SYSTEM,
+        system=system(),
         output_config={"effort": "low"},
         messages=[{"role": "user", "content": user(text)}],
     )
@@ -91,6 +91,9 @@ def extract_grid(raw: str):
         return None, f"invalid JSON: {e}"
     if not isinstance(parsed, dict):
         return None, "JSON was not an object"
+    # The prompt no longer asks for the tone names back, because small models
+    # echoed the placeholder from the example. The caller knows them.
+    parsed.setdefault("tones", list(TONES))
     return parsed, None
 
 
