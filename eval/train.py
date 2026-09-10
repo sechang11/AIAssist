@@ -73,7 +73,8 @@ def main():
         gradient_accumulation_steps=args.accum,
         learning_rate=args.lr,
         lr_scheduler_type="cosine",
-        warmup_ratio=0.03,
+        # TRL 1.x dropped warmup_ratio in favour of an absolute step count.
+        warmup_steps=50,
         logging_steps=10,
         save_strategy="no",
         bf16=True,

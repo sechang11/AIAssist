@@ -266,6 +266,17 @@ _PLACEHOLDER = re.compile(
 def stage_pack():
     beats = [json.loads(l) for l in (DATA / "beats.jsonl").open(encoding="utf-8")]
 
+    # Overlapping generation runs append the same pair more than once, and a
+    # duplicated example is silently weighted twice during training.
+    unique, seen = [], set()
+    for beat in beats:
+        key = (beat["source"], beat["fragment"])
+        if key not in seen:
+            seen.add(key)
+            unique.append(beat)
+    print(f"dropped {len(beats) - len(unique)} duplicate beats")
+    beats = unique
+
     before = len(beats)
     beats = [
         b for b in beats
