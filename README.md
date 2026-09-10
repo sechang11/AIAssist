@@ -29,19 +29,26 @@ Adding a semantic judge, which reads each rewrite against the original and asks
 only whether the commitment, the facts and the roles survive, gives a different
 and strictly size-ordered answer:
 
+Three passes each, mean plus or minus half the range, because a single pass
+moves by up to sixteen points:
+
 | model | size | mechanical | faithful |
 |---|---|---|---|
-| Qwen 0.5B | 397 MB | 14% | 63% |
-| Qwen 0.5B fine-tuned | 397 MB | **66%** | **59%** |
-| Qwen 1.5B | 986 MB | 58% | 70% |
-| Qwen 1.5B fine-tuned | 986 MB | 60% | 66% |
-| Qwen 7B | 4.7 GB | 72% | 75% |
-| Qwen 14B | 9.0 GB | 72% | **81%** |
+| Qwen 0.5B | 397 MB | 19 ±8 | 63 ±2 |
+| Qwen 0.5B fine-tuned | 397 MB | **71 ±6** | **52 ±2** |
+| Qwen 1.5B | 986 MB | 65 ±7 | 71 ±2 |
+| Qwen 1.5B fine-tuned | 986 MB | 65 ±1 | 67 ±7 |
+| Qwen 7B | 4.7 GB | 72 | 75 |
+| Qwen 14B | 9.0 GB | 72 | **81** |
 
-Fine-tuning raised the mechanical score and lowered faithfulness, at both
-sizes. It taught the form of a good answer at the cost of the substance, which
-is Goodhart's law arriving on schedule: the metric rewarded exactly what
-training optimised and was blind to what that cost.
+Read the 0.5B rows together. Fine-tuning moved its mechanical score up
+fifty-two points and its faithfulness down eleven, and neither range overlaps.
+It is the best small model on the metric and the worst on the thing the metric
+is a proxy for.
+
+That is Goodhart's law arriving on schedule, and I built the trap myself: the
+training data was filtered by the same mechanical rules the eval scores with,
+so the student learned to satisfy them. What they do not measure got worse.
 
 So the earlier conclusion here, that a ceiling near 74% exists and model size
 does not move it, was an artefact of the instrument. Size does buy fidelity,

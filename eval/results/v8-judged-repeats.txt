@@ -1,0 +1,259 @@
+judge: qwen2.5:14b-instruct
+
+rep-qwen2.5-0.5b-instruct-1  60.0% judged unchanged   (60 of 150 flagged)
+     decline [Concise] redundant info
+       was: sorry i cant make saturday, ive got my sisters wedding. have a great time though
+       got: sorry i cant make saturday, ive got my sisters wedding, have a great time though ive got
+     decline [Formal] repeats self, adds thanks
+       was: sorry i cant make saturday, ive got my sisters wedding. have a great time though
+       got: sorry i cant make saturday, ive got my sisters wedding, have a great time, thanks for as
+     decline [Warm] repeats self, adds new phrase
+       was: sorry i cant make saturday, ive got my sisters wedding. have a great time though
+       got: sorry i cant make saturday, ive got my sisters wedding, have a great time, you too!;) iv
+     late-yes [Concise] repeats self, adds confusion
+       was: hey so sorry i didnt get back to you sooner, this week has been mental. friday still wor
+       got: Hey, I'm sorry I haven't replied sooner. Friday still works for you if that's okay? Look
+     late-yes [Formal] Duplicate Friday question, added well-wishing.
+       was: hey so sorry i didnt get back to you sooner, this week has been mental. friday still wor
+       got: Hey, sorry I haven't replied sooner. Friday still works for you. Looking forward to it. 
+     time-swap [Warm] repeats traffic issue
+       was: can we push it to 7:30 instead of 6? traffic is going to be awful
+       got: 7:30 instead of 6? traffic is going to be awful Traffic is going to be awful
+
+rep-qwen2.5-0.5b-instruct-2  64.7% judged unchanged   (53 of 150 flagged)
+     decline [Formal] repeats and adds new phrase
+       was: sorry i cant make saturday, ive got my sisters wedding. have a great time though
+       got: sorry i cant make saturday, ive got my sisters wedding. have a great time though, sorry 
+     decline [Warm] repeated and added phrases
+       was: sorry i cant make saturday, ive got my sisters wedding. have a great time though
+       got: sorry i cant make saturday, ive got my sisters wedding, have a great time though have a 
+     late-yes [Concise] added emojis, changed tone
+       was: hey so sorry i didnt get back to you sooner, this week has been mental. friday still wor
+       got: Short, Concise, Formal This week has been mental. friday still works for me Hey, I'm sti
+     late-yes [Formal] Roles swapped, commitment unclear
+       was: hey so sorry i didnt get back to you sooner, this week has been mental. friday still wor
+       got: Short, Concise, Formal This week has been mental. it's great that Friday is still availa
+     late-yes [Warm] added new commitment
+       was: hey so sorry i didnt get back to you sooner, this week has been mental. friday still wor
+       got: Short, Warm, Formal This week has been mental. friday still works for me if thats ok? I'
+     time-swap [Warm] repetition, unclear meaning
+       was: can we push it to 7:30 instead of 6? traffic is going to be awful
+       got: can we push it to 7:30 instead of 6? traffic is going to be awful? Traffic is awful goin
+
+rep-qwen2.5-0.5b-instruct-3  63.3% judged unchanged   (55 of 150 flagged)
+     decline [Concise] redundancy and altered closing
+       was: sorry i cant make saturday, ive got my sisters wedding. have a great time though
+       got: sorry i cant make saturday, ive got my sisters wedding ive got my sisters wedding. Have 
+     decline [Formal] repeats self, adds new wish
+       was: sorry i cant make saturday, ive got my sisters wedding. have a great time though
+       got: sorry i cant make saturday, ive got my sisters wedding ive got my sisters wedding. Enjoy
+     decline [Warm] extra congrats and enthusiasm
+       was: sorry i cant make saturday, ive got my sisters wedding. have a great time though
+       got: i'm sorry i can't make saturday, ive got my sisters wedding ive got my sisters wedding. 
+     late-yes [Formal] redundant phrases, altered tone
+       was: hey so sorry i didnt get back to you sooner, this week has been mental. friday still wor
+       got: Hey, I'm sorry for not reaching out sooner. This week has been pretty mental. Friday sti
+     late-yes [Warm] redundant and unclear
+       was: hey so sorry i didnt get back to you sooner, this week has been mental. friday still wor
+       got: Hey, I'm sorry for not being able to reach you sooner. This week has been pretty mental.
+     money [Warm] added confirmation request
+       was: the quote came to 480 including delivery, let me know if thats ok
+       got: the quote was sent to 480 including delivery Please confirm if that is acceptable. Thank
+
+rep-qwen2.5-1.5b-instruct-1  68.0% judged unchanged   (48 of 150 flagged)
+     genuine-maybe [Formal] adds commitment to update
+       was: not sure yet, depends if my shift changes. ill know by wednesday
+       got: I'm not sure yet, but I'll update you on Wednesday. ill be informed by wednesday
+     genuine-maybe [Warm] commitment unclear
+       was: not sure yet, depends if my shift changes. ill know by wednesday
+       got: I'm still not sure, but that shouldn't take long. ill know by wednesday
+     late-yes [Concise] extra commitment added
+       was: hey so sorry i didnt get back to you sooner, this week has been mental. friday still wor
+       got: hey sorry for the delay in my response this week was a bit intense. hey so sorry i didnt
+     money [Formal] Roles reversed, commitment lost.
+       was: the quote came to 480 including delivery, let me know if thats ok
+       got: The quote totals $480 including delivery I'll let you know if okay.
+     rambling [Warm] Added postponing option
+       was: so i spoke to Ella and she reckons tuesday is better for everyone, but i also need to so
+       got: So I spoke to Ella and she believes Tuesday is better for everyone. But I also need to s
+     work-review [Formal] Duplicate self, unclear structure
+       was: Hi Priya, the deck is ready for review. I've left comments on slides 4 and 9. Could you 
+       got: Hi Priya, please review your deck. Priya, I've left comments on slides 4 and 9. Could yo
+
+rep-qwen2.5-1.5b-instruct-2  72.7% judged unchanged   (41 of 150 flagged)
+     decline [Concise] extra commitments
+       was: sorry i cant make saturday, ive got my sisters wedding. have a great time though
+       got: Sorry, can't make Saturday. Hope you have a great time. Sorry, can't make it to Saturday
+     decline [Formal] Duplicate message, wedding detail added.
+       was: sorry i cant make saturday, ive got my sisters wedding. have a great time though
+       got: Sorry, can't make Saturday. Enjoy yourself! I'm sorry, but I can't make it to Saturday. 
+     decline [Warm] repeats self, adds commitment
+       was: sorry i cant make saturday, ive got my sisters wedding. have a great time though
+       got: Sorry, can't make Saturday. Have a great time! I'm sorry, but I can't make it to Saturda
+     late-yes [Warm] adds new commitment
+       was: hey so sorry i didnt get back to you sooner, this week has been mental. friday still wor
+       got: Hey, I apologize for the delay. Friday's a go for me. This week felt stressful It's Frid
+     money [Formal] roles swapped, commitment altered
+       was: the quote came to 480 including delivery, let me know if thats ok
+       got: The quote amounts to 480, including delivery. I'll confirm that, please.
+     work-review [Warm] Due by Thursday vs before Thursday
+       was: Hi Priya, the deck is ready for review. I've left comments on slides 4 and 9. Could you 
+       got: Hi Priya, your quick review of the deck is due by Thursday. I've noted changes on slides
+
+rep-qwen2.5-1.5b-instruct-3  72.0% judged unchanged   (42 of 150 flagged)
+     money [Concise] adds new commitment
+       was: the quote came to 480 including delivery, let me know if thats ok
+       got: The total comes to 480, including delivery. Sure, let me know if you need any adjustment
+     money [Formal] added confirmation, changed meaning
+       was: the quote came to 480 including delivery, let me know if thats ok
+       got: I have a total of 480 on the quote, including delivery. Just let me know if the total in
+     rambling [Concise] Tuesday commitment swapped
+       was: so i spoke to Ella and she reckons tuesday is better for everyone, but i also need to so
+       got: Alright, Ella. Tuesday works for everyone. but I also need to sort out the car for Tuesd
+     rambling [Formal] Added commitment to Tuesday
+       was: so i spoke to Ella and she reckons tuesday is better for everyone, but i also need to so
+       got: Let's settle on Tuesday, Ella. But I have to sort the car out for Tuesday and honestly, 
+     rambling [Warm] Added uncertainty about car sort
+       was: so i spoke to Ella and she reckons tuesday is better for everyone, but i also need to so
+       got: According to Ella, Tuesday is ideal for everyone. But I need to get the car sorted for T
+     time-swap [Formal] omits traffic reason
+       was: can we push it to 7:30 instead of 6? traffic is going to be awful
+       got: can we push it to 7:30 instead of 6? next time
+
+rep-remix-0.5b-1      50.7% judged unchanged   (74 of 150 flagged)
+     decline [Formal] Added new commitments
+       was: sorry i cant make saturday, ive got my sisters wedding. have a great time though
+       got: I regret that I will not be able to attend on Saturday. I have a sister's wedding schedu
+     decline [Warm] added new commitments
+       was: sorry i cant make saturday, ive got my sisters wedding. have a great time though
+       got: i hope you have a great saturday, but unfortunately, i can't make it on saturday. i have
+     late-yes [Formal] adds assumptions about reader's feelings
+       was: hey so sorry i didnt get back to you sooner, this week has been mental. friday still wor
+       got: i apologize for not getting back to you so quickly this week has been quite mentally tax
+     late-yes [Warm] added new context, feels less urgent
+       was: hey so sorry i didnt get back to you sooner, this week has been mental. friday still wor
+       got: i hope you're doing well i know it's been quite a while since we've had our usual schedu
+     money [Warm] added request for confirmation
+       was: the quote came to 480 including delivery, let me know if thats ok
+       got: i hope that's correct - the quote is 480 for the whole package, including delivery. woul
+     time-swap [Warm] added need and hope
+       was: can we push it to 7:30 instead of 6? traffic is going to be awful
+       got: hey, could you please let me know if we can move the meeting time to 7:30 instead of 6? 
+
+rep-remix-0.5b-2      50.0% judged unchanged   (75 of 150 flagged)
+     decline [Concise] added sister's party, removed wedding
+       was: sorry i cant make saturday, ive got my sisters wedding. have a great time though
+       got: i'm sorry, i can't make it to saturday. i'm sorry i can't make it to saturday's sister's
+     decline [Formal] Added new commitments
+       was: sorry i cant make saturday, ive got my sisters wedding. have a great time though
+       got: I regret that I cannot attend Saturday. I regret that I will not be able to attend your 
+     decline [Warm] Confuses reasons and offers new plans.
+       was: sorry i cant make saturday, ive got my sisters wedding. have a great time though
+       got: i'm so sorry for the absence on saturday, hope you had a great time! hey there! i know y
+     rambling [Concise] added commitment Ella never made
+       was: so i spoke to Ella and she reckons tuesday is better for everyone, but i also need to so
+       got: tuesday works for us all, so i spoke with ella and said it's great for the whole family.
+     rambling [Warm] added new commitments
+       was: so i spoke to Ella and she reckons tuesday is better for everyone, but i also need to so
+       got: i talked to ella about tuesday being a good idea for everyone, and she thinks it's perfe
+     tiny [Warm] adds uncertainty
+       was: ok cool see you then
+       got: looking forward to seeing you then, ok?
+
+rep-remix-0.5b-3      54.0% judged unchanged   (69 of 150 flagged)
+     decline [Concise] confuses wedding for party
+       was: sorry i cant make saturday, ive got my sisters wedding. have a great time though
+       got: i'm sorry i can't make it to saturday. i'll be there for saturday's sister's party. grea
+     decline [Formal] Confusing commitments and adding new facts.
+       was: sorry i cant make saturday, ive got my sisters wedding. have a great time though
+       got: I regret that I will not be able to attend Saturday. I regret that I will not be able to
+     decline [Warm] Inconvenience, looking forward mismatch.
+       was: sorry i cant make saturday, ive got my sisters wedding. have a great time though
+       got: i hope you have a great saturday, and i apologize for the inconvenience. i've got to att
+     late-yes [Warm] adds new concerns
+       was: hey so sorry i didnt get back to you sooner, this week has been mental. friday still wor
+       got: i understand that it's been a bit of a wait, but i hope we can catch up soon! i've had a
+     time-swap [Formal] added new commitment
+       was: can we push it to 7:30 instead of 6? traffic is going to be awful
+       got: may we reschedule our meeting to 7:30 instead of 6? i've been looking forward to it. Tra
+     time-swap [Warm] added waiting, hope, tough traffic
+       was: can we push it to 7:30 instead of 6? traffic is going to be awful
+       got: hey, do you think we could move the meeting time to 7:30 instead of 6? i've been waiting
+
+rep-remix-1.5b-1      74.7% judged unchanged   (38 of 150 flagged)
+     decline [Warm] added wedding excitement, removed hope
+       was: sorry i cant make saturday, ive got my sisters wedding. have a great time though
+       got: i hope you have a fantastic time without me on saturday! i'm so excited for my sister's 
+     slang [Formal] Added condition, changed intent.
+       was: nah im good mate, gonna stay in and watch the match
+       got: I am available for the game, provided it is a friendly one. I will be staying in and wat
+     slang [Warm] Offers conditional, original unconditional
+       was: nah im good mate, gonna stay in and watch the match
+       got: i'm good to hang out, but only if we're watching the match together. i'll be watching th
+     standup [Concise] commitment timing shifted
+       was: Apologies for missing the standup, my train was cancelled. I've updated the ticket with 
+       got: apologies for missing the standup my train got cancelled. i'm updating the ticket now.
+     time-swap [Formal] adds new question
+       was: can we push it to 7:30 instead of 6? traffic is going to be awful
+       got: may we consider pushing the meeting to 7:30 rather than 6? traffic is expected to be cha
+     tiny [Formal] offer became question
+       was: ok cool see you then
+       got: may we meet then?
+
+rep-remix-1.5b-2      61.3% judged unchanged   (58 of 150 flagged)
+     decline [Warm] added new commitment
+       was: sorry i cant make saturday, ive got my sisters wedding. have a great time though
+       got: i'm sorry i can't make it this saturday i can't make it on saturday, i have a busy day w
+     money [Concise] reader's ok swapped
+       was: the quote came to 480 including delivery, let me know if thats ok
+       got: 480 including delivery let me know if that works for you.
+     rambling [Formal] added uncertainty about funds
+       was: so i spoke to Ella and she reckons tuesday is better for everyone, but i also need to so
+       got: So I spoke with Ella and she has suggested Tuesday as a better time for everyone. I need
+     rambling [Warm] added certainty about Tuesday
+       was: so i spoke to Ella and she reckons tuesday is better for everyone, but i also need to so
+       got: so i talked to Ella and she thinks Tuesday would be perfect for everyone! hey, i've got 
+     tiny [Formal] adds confirmation, changes commitment
+       was: ok cool see you then
+       got: may i confirm our meeting on that date? see you then.
+     work-review [Formal] comments role swapped
+       was: Hi Priya, the deck is ready for review. I've left comments on slides 4 and 9. Could you 
+       got: Hi Priya, the deck is ready for review. could i please leave my comments on slides 4 and
+
+rep-remix-1.5b-3      64.7% judged unchanged   (53 of 150 flagged)
+     decline [Warm] commitment swapped
+       was: sorry i cant make saturday, ive got my sisters wedding. have a great time though
+       got: i hope you have a great time without me this saturday! i'll have to attend my sister's w
+     late-yes [Warm] reschedule request added
+       was: hey so sorry i didnt get back to you sooner, this week has been mental. friday still wor
+       got: i hope this isn't too much trouble, but could we reschedule for a bit later? i've been f
+     time-swap [Warm] unclear commitment
+       was: can we push it to 7:30 instead of 6? traffic is going to be awful
+       got: let's try 7:30 instead of 6; i know traffic can be rough. i know traffic's rough, can we
+     tiny [Formal] adds new commitment
+       was: ok cool see you then
+       got: may we meet at 12 pm on the dot?
+     tiny [Warm] adds excitement
+       was: ok cool see you then
+       got: see you then, i'm excited!
+     work-review [Formal] Added new request for Priya.
+       was: Hi Priya, the deck is ready for review. I've left comments on slides 4 and 9. Could you 
+       got: Hi Priya, I have completed the deck for your review. Please let me know if you need any 
+
+
+==================================================================
+  rep-remix-1.5b-1        74.7% faithful
+  rep-qwen2.5-1.5b-instruct-2  72.7% faithful
+  rep-qwen2.5-1.5b-instruct-3  72.0% faithful
+  rep-qwen2.5-1.5b-instruct-1  68.0% faithful
+  rep-qwen2.5-0.5b-instruct-2  64.7% faithful
+  rep-remix-1.5b-3        64.7% faithful
+  rep-qwen2.5-0.5b-instruct-3  63.3% faithful
+  rep-remix-1.5b-2        61.3% faithful
+  rep-qwen2.5-0.5b-instruct-1  60.0% faithful
+  rep-remix-0.5b-3        54.0% faithful
+  rep-remix-0.5b-1        50.7% faithful
+  rep-remix-0.5b-2        50.0% faithful
+
+A judge is an instrument, not a guarantee. It is a model, it can be
+wrong, and judging one Qwen with another flatters the family.
