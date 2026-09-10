@@ -15,6 +15,8 @@ import sys
 from pathlib import Path
 
 HERE = Path(__file__).parent
+sys.path.insert(0, str(HERE))
+import pipeline  # noqa: E402
 
 WEEKDAYS = {
     "monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday",
@@ -151,7 +153,25 @@ def grade_one(record, message):
     if worst >= 0.4:
         out["problems"].append(f"neighbouring beats repeat each other ({where}, {worst:.2f})")
 
-    # 5. A text message should not come back as an essay.
+    # 5. How much of this message is the writer's own words, handed back
+    # untouched because the guarantee refused what the model offered? Safe, but
+    # it is the price of safety and a score that hides it would flatter.
+    beats = pipeline.split_beats(source)
+    reverted = total_alts = 0
+    for i, slot in enumerate(grid["slots"]):
+        if i >= len(beats):
+            continue
+        for alternative in slot["alternatives"]:
+            total_alts += 1
+            if alternative.strip() == beats[i].strip():
+                reverted += 1
+    out["reverted_share"] = reverted / max(total_alts, 1)
+    out["mostly_original"] = out["reverted_share"] > 0.5
+    if out["mostly_original"]:
+        out["problems"].append(
+            f"{100 * out['reverted_share']:.0f}% of alternatives are the original, unchanged")
+
+    # 6. A text message should not come back as an essay.
     ratios = [len(c) / max(len(source), 1) for c in columns]
     out["length_ratio"] = sum(ratios) / len(ratios)
     if out["length_ratio"] > 1.8:
@@ -183,6 +203,7 @@ def score(path, messages):
         "alts_distinct": pct("alts_distinct"),
         "slots_independent": pct("slots_independent"),
         "clean": pct("clean"),
+        "reverted": 100.0 * sum(g.get("reverted_share", 0.0) for g in graded) / total,
         "median_s": times[len(times) // 2] if times else 0.0,
         "slowest_s": times[-1] if times else 0.0,
     }
@@ -201,18 +222,20 @@ def main():
     results = [score(p, messages) for p in paths]
 
     header = (f"{'model':<36}{'valid':>7}{'hard':>7}{'soft':>7}{'no-add':>8}"
-              f"{'distinct':>10}{'indep':>7}{'CLEAN':>8}{'med s':>7}{'max s':>7}")
+              f"{'distinct':>10}{'indep':>7}{'kept-as-is':>12}{'CLEAN':>8}{'med s':>7}")
     print("\n" + header)
     print("-" * len(header))
     for r in results:
         print(f"{r['model'][:35]:<36}{r['valid']:>6.0f}%{r['hard_kept']:>6.0f}%"
               f"{r['soft_kept']:>6.0f}%{r['nothing_invented']:>7.0f}%"
               f"{r['alts_distinct']:>9.0f}%{r['slots_independent']:>6.0f}%"
-              f"{r['clean']:>7.0f}%{r['median_s']:>7.1f}{r['slowest_s']:>7.1f}")
+              f"{r['reverted']:>11.0f}%{r['clean']:>7.0f}%{r['median_s']:>7.1f}")
     print("\nCLEAN is the headline: no problem of any kind on that message.")
     print("valid = right shape | hard = days, times, numbers and names survived")
     print("soft = ordinary nouns survived, a quality signal the guarantee does not cover")
-    print("no-add = invented no day, time or number | indep = neighbouring beats do not repeat\n")
+    print("no-add = invented no day, time or number | indep = neighbouring beats do not repeat")
+    print("kept-as-is = share of alternatives handed back unchanged because the guarantee")
+    print("             refused what the model offered. Safe, but it is the price of safety.\n")
 
     for r in results:
         broken = [g for g in r["graded"] if g["problems"]]
