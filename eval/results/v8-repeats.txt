@@ -1,0 +1,22 @@
+  running qwen2.5:0.5b-instruct pass 1
+  running qwen2.5:0.5b-instruct pass 2
+  running qwen2.5:0.5b-instruct pass 3
+  running remix-0.5b pass 1
+  running remix-0.5b pass 2
+  running remix-0.5b pass 3
+  running qwen2.5:1.5b-instruct pass 1
+  running qwen2.5:1.5b-instruct pass 2
+  running qwen2.5:1.5b-instruct pass 3
+  running remix-1.5b pass 1
+  running remix-1.5b pass 2
+  running remix-1.5b pass 3
+
+model                               valid         hard         soft       no-add     distinct        indep   kept-as-is        CLEAN
+------------------------------------------------------------------------------------------------------------------------------------
+qwen2.5:0.5b-instruct           100   +-0    100   +-0     97   +-1     99   +-1     25   +-4     84   +-6     37   +-5     19   +-8
+remix-0.5b                      100   +-0    100   +-0     91   +-1     99   +-1     95   +-1     93   +-1      7   +-1     71   +-6
+qwen2.5:1.5b-instruct           100   +-0    100   +-0     91   +-1     95   +-2     83   +-4     93   +-6      8   +-1     65   +-7
+remix-1.5b                      100   +-0    100   +-0     89   +-3     91   +-3     91   +-3     95   +-3      8   +-1     65   +-1
+
+mean +- half the range, over 3 passes of fifty messages each.
+Overlapping ranges are not a ranking.
