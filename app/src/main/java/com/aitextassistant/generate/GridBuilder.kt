@@ -16,9 +16,9 @@ interface BeatRewriter {
  * Turns a message into a grid one beat at a time, and holds the rules that make
  * the result trustworthy.
  *
- * A port of eval/pipeline.py's build_grid, where the numbers came from: on the
- * twenty-message test set this took a 1.5B model from 5% to 65% clean, and made
- * it score the same as a model five times larger. Keep the two in step.
+ * A port of eval/pipeline.py's build_grid, where the numbers came from. On the
+ * fifty-message set this took a 1.5B model from 14% clean to 74%, and left it
+ * scoring as well as one nine times its size. Keep the two in step.
  *
  * Emits the grid as it grows, so the screen fills in beat by beat instead of
  * waiting on the slowest one. The beats are independent by construction, which

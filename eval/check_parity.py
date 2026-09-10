@@ -71,6 +71,38 @@ def check_splitter():
     return ok
 
 
+def check_guards():
+    """The two rules the app promises, checked on the cases that produced them.
+    Both are ported to Kotlin in BeatSplitter and tested there too; this catches
+    the two implementations drifting apart."""
+    lost = [
+        ("its in room B not room A", "its in room 1 not room 2", ["B", "A"]),
+        ("friday still works", "it still works", ["friday"]),
+        ("before 11", "before 11am", []),
+        ("this week has been mental", "busy week", []),
+        ("I will be late", "running late", []),
+    ]
+    collapse = [
+        ("have a great time though", "concern", True),
+        ("the quote came to 480 including delivery", "quote's 480", False),
+        ("sure thing", "Absolutely", False),
+    ]
+    ok = True
+    for fragment, rewrite, expected in lost:
+        got = pipeline.lost_tokens(fragment, rewrite)
+        if got != expected:
+            print(f"FAIL  lost_tokens({fragment!r}, {rewrite!r}) = {got}, expected {expected}")
+            ok = False
+    for fragment, rewrite, expected in collapse:
+        got = pipeline.collapsed(fragment, rewrite)
+        if got != expected:
+            print(f"FAIL  collapsed({fragment!r}, {rewrite!r}) = {got}, expected {expected}")
+            ok = False
+    if ok:
+        print(f"ok    guards: {len(lost) + len(collapse)} cases match the Kotlin tests")
+    return ok
+
+
 def check_messages():
     """Every eval message needs the fields grade.py reads."""
     ok = True
@@ -93,5 +125,5 @@ def check_messages():
 
 
 if __name__ == "__main__":
-    results = [check_prompt(), check_splitter(), check_messages()]
+    results = [check_prompt(), check_splitter(), check_guards(), check_messages()]
     sys.exit(0 if all(results) else 1)
