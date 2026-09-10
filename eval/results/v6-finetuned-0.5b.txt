@@ -1,0 +1,1179 @@
+
+model                                 valid   hard   soft  no-add  distinct  indep   CLEAN  med s  max s
+--------------------------------------------------------------------------------------------------------
+ollama:qwen2.5:0.5b-instruct [split    100%   100%    88%     96%       36%    92%     30%    0.3   13.1
+ollama:qwen2.5:1.5b-instruct [grid]     98%    84%    86%     92%       70%    38%     14%    0.5    1.7
+ollama:qwen2.5:1.5b-instruct [split    100%   100%    92%     96%       88%    98%     74%    0.3    1.8
+ollama:qwen2.5:14b-instruct [split]    100%   100%    90%    100%       82%    98%     74%   16.5   68.2
+ollama:qwen2.5:7b-instruct [split]     100%   100%    90%     98%       88%    96%     68%    0.5    2.1
+ollama:remix-0.5b [split]              100%   100%    90%     96%       90%    90%     58%    0.4    6.5
+
+CLEAN is the headline: no problem of any kind on that message.
+valid = right shape | hard = days, times, numbers and names survived
+soft = ordinary nouns survived, a quality signal the guarantee does not cover
+no-add = invented no day, time or number | indep = neighbouring beats do not repeat
+
+
+=== ollama:qwen2.5:0.5b-instruct [split] | 35 of 50 messages have problems ===
+
+  late-yes
+    - identical alternatives in: concise
+
+  decline
+    - Warm invented 'today'
+    - Formal invented 'today'
+    - identical alternatives in: warm
+
+  time-swap
+    - identical alternatives in: part 1
+
+  work-review
+    - identical alternatives in: Formal, concise, concise
+    - neighbouring beats repeat each other (Warm, beats 1 and 2, 0.47)
+    - grew to 1.9x the original
+
+  rambling
+    - identical alternatives in: play it by ear
+
+  standup
+    - Concise lost 'train'
+    - identical alternatives in: Standup
+
+  genuine-maybe
+    - identical alternatives in: no
+
+  logistics
+    - identical alternatives in: Formal
+
+  either-or
+    - identical alternatives in: lift request
+
+  conditional
+    - identical alternatives in: Warm
+    - neighbouring beats repeat each other (Concise, beats 1 and 2, 0.46)
+
+  cheerful
+    - Concise lost 'drinks'
+    - Warm lost 'drinks'
+    - Formal lost 'drinks'
+    - neighbouring beats repeat each other (Concise, beats 1 and 2, 1.00)
+
+  late-traffic
+    - identical alternatives in: concise, Traffic on A406
+
+  errand
+    - identical alternatives in: Formal
+
+  half-seven
+    - Warm invented '7:30'
+    - identical alternatives in: formal
+
+  reassurance
+    - identical alternatives in: part 1
+
+  where-we-are
+    - neighbouring beats repeat each other (Concise, beats 1 and 2, 0.60)
+    - grew to 2.0x the original
+
+  already-formal
+    - identical alternatives in: Formal, Formal
+
+  no-then-yes
+    - identical alternatives in: part 2
+
+  hearsay
+    - identical alternatives in: Concise
+
+  split-bill
+    - identical alternatives in: Tip Tip
+
+  gentle-chase
+    - identical alternatives in: concise
+
+  survey
+    - Warm lost 'bathroom'
+    - Formal lost 'bathroom'
+
+  enthusiastic
+    - identical alternatives in: amazing
+
+  swap-days
+    - identical alternatives in: simple
+
+  mild-complaint
+    - identical alternatives in: no
+
+  flight
+    - identical alternatives in: Optional, Concise
+
+  door-code
+    - identical alternatives in: formal
+
+  good-luck
+    - Concise lost 'interview'
+    - Warm lost 'interview'
+    - Formal lost 'interview'
+    - identical alternatives in: part 2
+
+  resend
+    - Concise lost 'invoice'
+    - Warm lost 'invoice'
+    - Formal lost 'invoice'
+    - identical alternatives in: no
+
+  serious
+    - Concise lost 'yesterday'
+    - Warm lost 'yesterday'
+    - Formal lost 'yesterday'
+    - identical alternatives in: talk
+
+  swamped
+    - identical alternatives in: Two-word message label
+
+  eta
+    - identical alternatives in: Formal, Formal
+
+  good-news
+    - identical alternatives in: concise
+
+  room-change
+    - identical alternatives in: Concise
+
+  paid
+    - identical alternatives in: no
+
+=== ollama:qwen2.5:1.5b-instruct [grid] | 43 of 50 messages have problems ===
+
+  decline
+    - neighbouring beats repeat each other (Concise, beats 1 and 2, 1.00)
+    - grew to 4.1x the original
+
+  time-swap
+    - grew to 2.0x the original
+
+  money
+    - neighbouring beats repeat each other (Concise, beats 2 and 3, 1.00)
+
+  work-review
+    - Concise lost 'Priya'
+    - Warm lost 'Priya'
+    - Formal lost 'Priya'
+    - identical alternatives in: slot2
+
+  tiny
+    - neighbouring beats repeat each other (Concise, beats 1 and 2, 1.00)
+    - grew to 4.6x the original
+
+  rambling
+    - no usable JSON object in the reply
+
+  slang
+    - Concise lost 'match'
+    - Formal lost 'match'
+
+  standup
+    - identical alternatives in: default, default, default
+    - neighbouring beats repeat each other (Concise, beats 1 and 2, 1.00)
+    - grew to 2.9x the original
+
+  genuine-maybe
+    - identical alternatives in: slot1
+    - neighbouring beats repeat each other (Concise, beats 1 and 2, 1.00)
+    - grew to 3.2x the original
+
+  logistics
+    - neighbouring beats repeat each other (Concise, beats 1 and 2, 1.00)
+    - grew to 6.6x the original
+
+  bad-news
+    - Warm lost 'survey'
+    - Formal lost 'survey'
+    - grew to 2.9x the original
+
+  thanks
+    - neighbouring beats repeat each other (Formal, beats 1 and 2, 0.50)
+    - grew to 2.6x the original
+
+  chase
+    - Concise lost '3rd'
+    - Warm lost '3rd'
+    - Formal lost '3rd'
+    - identical alternatives in: invoice status, confirmation, next step
+    - neighbouring beats repeat each other (Concise, beats 1 and 2, 0.50)
+
+  booking
+    - Formal lost '8pm'
+    - neighbouring beats repeat each other (Warm, beats 1 and 2, 1.00)
+    - grew to 2.4x the original
+
+  either-or
+    - Formal lost 'train'
+    - grew to 3.3x the original
+
+  cheerful
+    - Concise lost 'drinks'
+    - neighbouring beats repeat each other (Concise, beats 1 and 2, 1.00)
+    - grew to 2.0x the original
+
+  deferring
+    - Warm lost 'tomorrow'
+    - Formal lost 'Sam'
+
+  late-traffic
+    - Concise lost '15'
+    - Concise lost 'a406'
+    - Warm lost '15'
+    - Warm lost 'a406'
+    - Formal lost '15'
+    - Formal lost 'a406'
+    - neighbouring beats repeat each other (Concise, beats 1 and 2, 1.00)
+    - grew to 2.2x the original
+
+  errand
+    - neighbouring beats repeat each other (Concise, beats 3 and 4, 1.00)
+    - grew to 3.7x the original
+
+  half-seven
+    - Concise invented '7:00'
+    - Warm invented '7:00'
+    - Formal invented '7:00'
+    - identical alternatives in: slot 1
+    - neighbouring beats repeat each other (Concise, beats 2 and 3, 1.00)
+    - grew to 3.3x the original
+
+  reassurance
+    - identical alternatives in: slot2, slot3
+    - neighbouring beats repeat each other (Concise, beats 3 and 4, 1.00)
+
+  where-we-are
+    - neighbouring beats repeat each other (Formal, beats 1 and 2, 0.70)
+    - grew to 2.1x the original
+
+  already-formal
+    - grew to 2.0x the original
+
+  no-then-yes
+    - identical alternatives in: context, time, response
+    - neighbouring beats repeat each other (Concise, beats 1 and 2, 1.00)
+    - grew to 1.8x the original
+
+  hearsay
+    - neighbouring beats repeat each other (Concise, beats 2 and 3, 1.00)
+    - grew to 5.6x the original
+
+  split-bill
+    - neighbouring beats repeat each other (Formal, beats 1 and 2, 0.86)
+    - grew to 2.3x the original
+
+  condolence
+    - identical alternatives in: slot_1, slot_2, slot_3, slot_4, slot_5
+    - grew to 2.5x the original
+
+  enthusiastic
+    - neighbouring beats repeat each other (Formal, beats 1 and 2, 0.50)
+
+  waiting-on
+    - identical alternatives in: slot 4, slot 5, slot 6
+    - neighbouring beats repeat each other (Warm, beats 5 and 6, 1.00)
+    - grew to 4.8x the original
+
+  swap-days
+    - Concise lost 'tuesday'
+    - Warm lost 'wednesday'
+    - Formal lost 'wednesday'
+    - Formal lost 'tuesday'
+    - Formal invented 'thursday'
+
+  mild-complaint
+    - neighbouring beats repeat each other (Warm, beats 1 and 2, 0.80)
+    - grew to 2.7x the original
+
+  flight
+    - identical alternatives in: time, time, time
+    - neighbouring beats repeat each other (Warm, beats 1 and 2, 1.00)
+    - grew to 2.9x the original
+
+  polite-no
+    - identical alternatives in: slot3
+    - neighbouring beats repeat each other (Concise, beats 2 and 3, 1.00)
+
+  rain-check
+    - identical alternatives in: i'm already in bed, sorry, rain check?, i'm already in bed, sorry, rain check?
+    - neighbouring beats repeat each other (Warm, beats 2 and 3, 1.00)
+    - grew to 2.7x the original
+
+  door-code
+    - neighbouring beats repeat each other (Concise, beats 1 and 2, 1.00)
+
+  good-luck
+    - Concise lost 'interview'
+    - Warm lost 'interview'
+    - Formal lost 'interview'
+    - neighbouring beats repeat each other (Concise, beats 2 and 3, 1.00)
+
+  resend
+    - Warm lost 'invoice'
+    - identical alternatives in: original, original
+    - neighbouring beats repeat each other (Concise, beats 2 and 3, 1.00)
+    - grew to 3.1x the original
+
+  serious
+    - grew to 3.9x the original
+
+  two-words
+    - Concise invented '1'
+    - Warm invented '2'
+    - Formal invented '3'
+    - neighbouring beats repeat each other (Concise, beats 1 and 2, 1.00)
+    - grew to 7.2x the original
+
+  swamped
+    - neighbouring beats repeat each other (Warm, beats 1 and 2, 0.77)
+    - grew to 2.7x the original
+
+  good-news
+    - identical alternatives in: slot1, slot3
+    - grew to 2.0x the original
+
+  confidence
+    - grew to 2.5x the original
+
+  room-change
+    - Concise lost '3pm'
+    - Warm lost '3pm'
+    - Formal lost '3pm'
+    - neighbouring beats repeat each other (Formal, beats 1 and 2, 0.44)
+    - grew to 2.6x the original
+
+=== ollama:qwen2.5:1.5b-instruct [split] | 13 of 50 messages have problems ===
+
+  decline
+    - Concise lost 'wedding'
+    - Formal lost 'wedding'
+
+  time-swap
+    - identical alternatives in: Request
+
+  work-review
+    - identical alternatives in: summary, Deck Review
+
+  rambling
+    - identical alternatives in: Plan
+
+  slang
+    - Concise lost 'match'
+    - Formal lost 'match'
+    - Formal invented 'tonight'
+    - grew to 2.0x the original
+
+  standup
+    - identical alternatives in: Apology
+
+  cheerful
+    - Warm lost 'drinks'
+    - Formal lost 'drinks'
+
+  half-seven
+    - Concise invented '7:30'
+    - Warm invented '7:30'
+    - Formal invented '7:30'
+
+  no-then-yes
+    - grew to 2.7x the original
+
+  split-bill
+    - Concise lost 'tip'
+
+  flight
+    - neighbouring beats repeat each other (Concise, beats 1 and 2, 0.50)
+    - grew to 1.8x the original
+
+  rain-check
+    - identical alternatives in: Check-in
+
+  swamped
+    - identical alternatives in: Impatient
+
+=== ollama:qwen2.5:14b-instruct [split] | 13 of 50 messages have problems ===
+
+  time-swap
+    - identical alternatives in: Proposal
+
+  work-review
+    - identical alternatives in: Main Point, Request
+
+  standup
+    - Concise lost 'standup'
+    - identical alternatives in: Apologies for missing the standup
+
+  bad-news
+    - Warm lost 'survey'
+
+  either-or
+    - Concise lost 'train'
+    - Formal lost 'train'
+
+  late-traffic
+    - identical alternatives in: Optional rewrite fragments:
+    - neighbouring beats repeat each other (Formal, beats 1 and 2, 0.43)
+
+  half-seven
+    - identical alternatives in: Core
+
+  where-we-are
+    - Formal lost 'pub'
+
+  already-formal
+    - identical alternatives in: Greeting Only
+
+  survey
+    - identical alternatives in: Condition
+
+  good-luck
+    - identical alternatives in: part 1
+
+  eta
+    - identical alternatives in: ETA
+
+  room-change
+    - Concise lost 'A'
+    - Warm lost 'A'
+
+=== ollama:qwen2.5:7b-instruct [split] | 16 of 50 messages have problems ===
+
+  money
+    - Concise lost 'delivery'
+
+  work-review
+    - identical alternatives in: review request
+
+  rambling
+    - identical alternatives in: schedule
+
+  standup
+    - Concise lost 'standup'
+    - identical alternatives in: apology
+
+  bad-news
+    - Concise lost 'survey'
+    - Warm lost 'survey'
+
+  thanks
+    - Concise lost 'yesterday'
+
+  either-or
+    - Concise lost 'train'
+    - Warm lost 'train'
+
+  cheerful
+    - identical alternatives in: sorted!!
+
+  late-traffic
+    - grew to 2.0x the original
+
+  half-seven
+    - Concise invented '7:30'
+    - Warm invented '7:30'
+    - Formal invented '7:30'
+
+  where-we-are
+    - neighbouring beats repeat each other (Formal, beats 1 and 2, 0.70)
+
+  already-formal
+    - identical alternatives in: greeting
+
+  no-then-yes
+    - grew to 2.2x the original
+
+  enthusiastic
+    - neighbouring beats repeat each other (Formal, beats 1 and 2, 0.44)
+
+  door-code
+    - identical alternatives in: code bins
+
+  two-words
+    - grew to 1.9x the original
+
+=== ollama:remix-0.5b [split] | 21 of 50 messages have problems ===
+
+  decline
+    - grew to 1.8x the original
+
+  money
+    - Concise lost 'delivery'
+
+  work-review
+    - identical alternatives in: deck check
+
+  slang
+    - grew to 1.8x the original
+
+  standup
+    - identical alternatives in: standup
+
+  genuine-maybe
+    - Warm invented '100'
+
+  bad-news
+    - Concise lost 'damp'
+    - Warm lost 'damp'
+
+  thanks
+    - Formal invented 'sunday'
+
+  booking
+    - neighbouring beats repeat each other (Formal, beats 1 and 2, 0.44)
+
+  either-or
+    - Concise lost 'train'
+    - Warm lost 'train'
+    - Formal lost 'train'
+
+  conditional
+    - neighbouring beats repeat each other (Formal, beats 1 and 2, 0.64)
+
+  cheerful
+    - grew to 2.0x the original
+
+  where-we-are
+    - identical alternatives in: pub
+    - neighbouring beats repeat each other (Warm, beats 1 and 2, 0.50)
+
+  already-formal
+    - identical alternatives in: greeting
+
+  no-then-yes
+    - grew to 2.2x the original
+
+  survey
+    - Concise lost 'damp'
+    - Formal lost 'damp'
+
+  flight
+    - neighbouring beats repeat each other (Formal, beats 1 and 2, 0.64)
+    - grew to 1.9x the original
+
+  good-luck
+    - neighbouring beats repeat each other (Formal, beats 1 and 2, 0.44)
+
+  serious
+    - Concise lost 'yesterday'
+    - Warm lost 'yesterday'
+
+  two-words
+    - grew to 2.8x the original
+
+  room-change
+    - identical alternatives in: meeting change
+
+
+=== Read these yourself ===
+No script can tell you whether a no is still a no. These are the messages
+where the writer took a position, so check the columns did not move it.
+
+  [ollama:qwen2.5:0.5b-instruct [split]] decline  (should read as: no)
+      was:  sorry i cant make saturday, ive got my sisters wedding. have a great time though
+      1:    sorry i cant make saturday I have my sister's wedding have a great time
+      2:    sorry i cant make saturday I have my sister's wedding today great times
+      3:    sorry i cant make saturday I have my sister's wedding scheduled for today have a great time,
+
+  [ollama:qwen2.5:0.5b-instruct [split]] time-swap  (should read as: maybe)
+      was:  can we push it to 7:30 instead of 6? traffic is going to be awful
+      1:    can we push it to 7:30 instead of 6? Traffic is going to be awful
+      2:    can we push it to 7:30 instead of 6? Traffic is about to be awful
+      3:    can we push it to 7:30 instead of 6? Traffic is awful
+
+  [ollama:qwen2.5:0.5b-instruct [split]] rambling  (should read as: maybe)
+      was:  so i spoke to Ella and she reckons tuesday is better for everyone, but i also need to sort the car out that week and honestly im not sure ill have the money until payday, can we play it by ear
+      1:    so i spoke to Ella and she reckons tuesday is better for everyone Warm play it by ear
+      2:    so i spoke to Ella and she reckons tuesday is better for everyone Formal don't overthink it
+      3:    so i spoke to Ella and she reckons tuesday is better for everyone Casual go with what's on the line
+
+  [ollama:qwen2.5:0.5b-instruct [split]] slang  (should read as: no)
+      was:  nah im good mate, gonna stay in and watch the match
+      1:    warm Stay in and watch the match
+      2:    formal I'll stay in and watch the match
+      3:    concise I'm gonna stay in and watch the match
+
+  [ollama:qwen2.5:0.5b-instruct [split]] genuine-maybe  (should read as: maybe)
+      was:  not sure yet, depends if my shift changes. ill know by wednesday
+      1:    Not sure yet, depends if my shift changes. ill know by wednesday
+      2:    Not sure yet, depending on my shift changes. ill know by wednesday
+      3:    Not sure yet, depending if my shift changes. ill know by wednesday
+
+  [ollama:qwen2.5:0.5b-instruct [split]] boundary  (should read as: no)
+      was:  id rather not talk about it right now if thats alright
+      1:    id rather not talk about it right now if thats alright
+      2:    id rather not talk about it right now if thats okay
+      3:    id rather not talk about it right now if thats all right
+
+  [ollama:qwen2.5:0.5b-instruct [split]] either-or  (should read as: maybe)
+      was:  are you still ok to give me a lift on sunday or shall i get the train
+      1:    are you still ok to give me a lift on sunday or shall i get the train
+      2:    are you still ok to give me a lift on sunday or shall i get the train
+      3:    are you still ok to give me a lift on sunday or shall i get the train
+
+  [ollama:qwen2.5:0.5b-instruct [split]] conditional  (should read as: yes-if)
+      was:  yes if we can finish by 4, otherwise ill have to skip it
+      1:    yes if we can finish by 4, otherwise ill have to skip it otherwise, ill have to skip it
+      2:    yes if we can finish by 4, otherwise ill have to skip it otherwise, I have to skip it
+      3:    yes if we can finish by 4, otherwise ill have to skip it otherwise, I should skip it
+
+  [ollama:qwen2.5:0.5b-instruct [split]] deferring  (should read as: maybe)
+      was:  let me check with Sam and come back to you tomorrow
+      1:    <<< let me check with Sam and come back to you tomorrow >>>
+      2:    <<< I'll check with Sam and will be back tomorrow >>>
+      3:    <<< I'll check with Sam and will be back to you tomorrow >>>
+
+  [ollama:qwen2.5:0.5b-instruct [split]] no-then-yes  (should read as: no)
+      was:  cant do this week im afraid, next week any good?
+      1:    A Concise Version next week any good?
+      2:    A Warm Version next week any good?
+      3:    A Formal Version next week any good?
+
+  [ollama:qwen2.5:0.5b-instruct [split]] hearsay  (should read as: maybe)
+      was:  she said no but i think she might come round
+      1:    She said no but I think she might come round
+      2:    She said no but I think she might come round
+      3:    She said no but I think she might come round
+
+  [ollama:qwen2.5:0.5b-instruct [split]] waiting-on  (should read as: maybe)
+      was:  ill let you know once ive spoken to Priya
+      1:    Ill let you know once Ive spoken to Priya
+      2:    Ill let you know when I've spoken to Priya
+      3:    Ill let you know once I've spoken to Priya
+
+  [ollama:qwen2.5:0.5b-instruct [split]] swap-days  (should read as: maybe)
+      was:  can we do wednesday instead of tuesday, ive got a thing
+      1:    can we do wednesday instead of tuesday This is a casual, friendly message.
+      2:    can we do wednesday instead of tuesday I think we could do Wednesdays instead of Tuesdays. I have something to work on.
+      3:    can we do wednesday instead of tuesday This is a polite, professional message.
+
+  [ollama:qwen2.5:0.5b-instruct [split]] polite-no  (should read as: no)
+      was:  not really my thing to be honest but thanks for asking
+      1:    Concise
+      2:    Formal
+      3:    Warm
+
+  [ollama:qwen2.5:0.5b-instruct [split]] rain-check  (should read as: no)
+      was:  im in bed already sorry, rain check?
+      1:    Simple, Warm, Formal
+      2:    Simple, Warm
+      3:    Simple, Formal
+
+  [ollama:qwen2.5:0.5b-instruct [split]] swamped  (should read as: no)
+      was:  sorry cant help this time, im completely swamped until the 20th
+      1:    Sorry this time im completely overwhelmed until the 20th
+      2:    Sorry this time im completely exhausted until the 20th
+      3:    Im sorry this time im completely unprepared until the 20th
+
+  [ollama:qwen2.5:0.5b-instruct [split]] confidence  (should read as: no)
+      was:  id rather we didnt tell anyone yet if thats ok
+      1:    Warm
+      2:    Formal
+      3:    Concise
+
+  [ollama:qwen2.5:1.5b-instruct [grid]] decline  (should read as: no)
+      was:  sorry i cant make saturday, ive got my sisters wedding. have a great time though
+      1:    sorry i cant make saturday, i have my sisters wedding. have a great time though sorry i cant make saturday, i have my sisters wedding. have a great time though sorry i cant make saturday, i have my sisters wedding. have a great time though sorry i cant make saturday, i have my sisters wedding. have a great time though
+      2:    sorry i can't make saturday, i have my sisters wedding. have a great time though sorry i can't make saturday, i have my sisters wedding. have a great time though sorry i can't make saturday, i have my sisters wedding. have a great time though sorry i can't make saturday, i have my sisters wedding. have a great time though
+      3:    sorry i can't make saturday, my sister is having a wedding, have a great time though sorry i can't make saturday, my sister is having a wedding, have a great time though sorry i can't make saturday, my sister is having a wedding, have a great time though sorry i can't make saturday, my sister is having a wedding, have a great time though
+
+  [ollama:qwen2.5:1.5b-instruct [grid]] time-swap  (should read as: maybe)
+      was:  can we push it to 7:30 instead of 6? traffic is going to be awful
+      1:    Can we move it up to 7:30 instead of 6? Traffic is expected to be terrible. There's going to be a very bad traffic situation.
+      2:    We could consider moving it to 7:30 rather than 6. We're facing a very bad traffic situation. Traffic is going to be horrendous.
+      3:    Let's try moving it to 7:30 instead of 6. There's going to be a major traffic jam. The traffic is expected to be absolutely horrendous.
+
+  [ollama:qwen2.5:1.5b-instruct [grid]] slang  (should read as: no)
+      was:  nah im good mate, gonna stay in and watch the match
+      1:    nah, stay in, mate im good, stay in gonna stay in, mate
+      2:    don't worry, be at home good to stay in, mate gonna watch the match, mate
+      3:    hang out, good for you good to stay home gonna be at home, mate
+
+  [ollama:qwen2.5:1.5b-instruct [grid]] genuine-maybe  (should read as: maybe)
+      was:  not sure yet, depends if my shift changes. ill know by wednesday
+      1:    not sure yet, depends if my shift changes. ill know by wednesday not sure yet, depends if my shift changes. ill know by wednesday not sure yet, depends if my shift changes. ill know by wednesday
+      2:    not sure yet, depends if my shift changes. ill know by wednesday i am unsure as to whether my shift will change. i will know by wednesday i am unsure if my shift will change. i will know by wednesday
+      3:    not sure yet, depends if my shift changes. ill know by wednesday i am not certain if my shift will change. i will be informed by wednesday i am not certain if my shift will change. i will be informed by wednesday
+
+  [ollama:qwen2.5:1.5b-instruct [grid]] boundary  (should read as: no)
+      was:  id rather not talk about it right now if thats alright
+      1:    don't discuss right now if it's alright
+      2:    avoid talking at this moment if okay
+      3:    stop talking about now if okay,
+
+  [ollama:qwen2.5:1.5b-instruct [grid]] either-or  (should read as: maybe)
+      was:  are you still ok to give me a lift on sunday or shall i get the train
+      1:    Are you still okay to give me a ride on Sunday? Or should I take the train? Could you confirm if you're still available for Sunday? Will you be able to come on Sunday? Is it okay to ask for your help on Sunday?
+      2:    Are you still available to give me a lift on Sunday? Or should I go by train? Could you let me know if you're still up for a Sunday ride? Could you confirm if you'll be available on Sunday? Is it alright to seek your support on Sunday?
+      3:    Are you still able to give me a ride on Sunday? Or should I use public transportation on Sunday? Could you inform me if you're still available on Sunday? Are you still available for Sunday? Should I ask if you're still available on Sunday?
+
+  [ollama:qwen2.5:1.5b-instruct [grid]] conditional  (should read as: yes-if)
+      was:  yes if we can finish by 4, otherwise ill have to skip it
+      1:    By 4 I'll skip it Yes
+      2:    If we can finish by 4 If I can't finish, I'll miss it Yes, we can finish
+      3:    If we can meet by 4 If I can't, I'll miss Yes, let's finish
+
+  [ollama:qwen2.5:1.5b-instruct [grid]] deferring  (should read as: maybe)
+      was:  let me check with Sam and come back to you tomorrow
+      1:    check with Sam tomorrow will text
+      2:    talk to Sam next day will call
+      3:    let's schedule a meeting day after tomorrow will send an email
+
+  [ollama:qwen2.5:1.5b-instruct [grid]] no-then-yes  (should read as: no)
+      was:  cant do this week im afraid, next week any good?
+      1:    next week any good? next week any good? next week any good?
+      2:    i cant do this week im afraid, next week any good? cant do this week im afraid, next week any good? cant do this week im afraid, next week any good?
+      3:    next week any good? next week any good? next week any good?
+
+  [ollama:qwen2.5:1.5b-instruct [grid]] hearsay  (should read as: maybe)
+      was:  she said no but i think she might come round
+      1:    She said no, but I believe she might reconsider. She said no, but I am hopeful she will change her mind. She said no, but I am hopeful she will change her mind. She said no, but I am hopeful she will change her mind.
+      2:    She did not agree, but I believe she might change her mind. She did not agree, but I am hopeful she will reconsider. She did not agree, but I am hopeful she will reconsider. She did not agree, but I am hopeful she will reconsider.
+      3:    She stated her disagreement, but I am hopeful she will change her mind. She stated her disagreement, but I am hopeful she will change her mind. She stated her disagreement, but I am hopeful she will change her mind. She stated her disagreement, but I am hopeful she will change her mind.
+
+  [ollama:qwen2.5:1.5b-instruct [grid]] waiting-on  (should read as: maybe)
+      was:  ill let you know once ive spoken to Priya
+      1:    speak to Priya once I speak to Priya ill let you know once I speak to Priya once Ive spoken to Priya ill let you know once Ive spoken to Priya ill let you know once I have spoken to Priya
+      2:    talk to Priya as soon as I speak to Priya ill let you know as soon as I speak to Priya once I have spoken to Priya ill let you know once I have spoken to Priya ill let you know once I have spoken to Priya
+      3:    contact Priya as soon as I talk to Priya ill let you know as soon as I talk to Priya once I have spoken to Priya ill let you know once I have spoken to Priya ill let you know once I have spoken to Priya
+
+  [ollama:qwen2.5:1.5b-instruct [grid]] swap-days  (should read as: maybe)
+      was:  can we do wednesday instead of tuesday, ive got a thing
+      1:    wednesday got a thing sure
+      2:    tuesday have something going on that's fine
+      3:    thursday have plans no problem
+
+  [ollama:qwen2.5:1.5b-instruct [grid]] polite-no  (should read as: no)
+      was:  not really my thing to be honest but thanks for asking
+      1:    not really my thing, honestly thanks for asking thanks for asking, thanks for asking
+      2:    not my cup of tea, to be honest for asking thanks for asking, thanks for asking
+      3:    not for me, honestly for asking it thanks for asking, thanks for asking
+
+  [ollama:qwen2.5:1.5b-instruct [grid]] rain-check  (should read as: no)
+      was:  im in bed already sorry, rain check?
+      1:    already in bed, sorry, rain check? i'm already in bed, sorry, rain check? i'm already in bed, sorry, r c?
+      2:    im in bed, sorry, r c? i'm already in bed, sorry, r c? i'm already in bed, sorry, r c?
+      3:    already bed, sorry, rain check? i'm already in bed, sorry, rain check? i'm already in bed, sorry, r c?
+
+  [ollama:qwen2.5:1.5b-instruct [grid]] swamped  (should read as: no)
+      was:  sorry cant help this time, im completely swamped until the 20th
+      1:    I'm sorry, I can't assist this time. I'm swamped until the 20th. You're welcome, I'm swamped until the 20th. Thank you, I'm swamped until the 20th.
+      2:    I apologize, I can't help with this. I'm swamped until the 20th. You're welcome, I can't help with this. I'm swamped until the 20th. Thank you, I can't help with this. I'm swamped until the 20th.
+      3:    I'm sorry, I can't assist. I'm swamped until the 20th. You're welcome, I can't assist. I'm swamped until the 20th. Thank you, I can't assist. I'm swamped until the 20th.
+
+  [ollama:qwen2.5:1.5b-instruct [grid]] confidence  (should read as: no)
+      was:  id rather we didnt tell anyone yet if thats ok
+      1:    Don't tell anyone yet. It's fine if you keep it a secret. I prefer not to share this information with anyone yet.
+      2:    We should keep it confidential. You can tell them if you feel it's necessary. We're better off not informing anyone just yet.
+      3:    Better not let anyone know. Let them know when you're ready. Let's keep this under the carpet for now.
+
+  [ollama:qwen2.5:1.5b-instruct [split]] decline  (should read as: no)
+      was:  sorry i cant make saturday, ive got my sisters wedding. have a great time though
+      1:    Sorry I can't make Saturday. Sorry I can't make it to Saturday, but I hope you have a fantastic time. concern
+      2:    I'm sorry I can't be there on Saturday. I have a sister's wedding this Saturday, but I hope you enjoy it. warning
+      3:    I apologize I won't be able to join you on Saturday. I'm sorry I can't join you on Saturday, but I wish you all the best. reminder
+
+  [ollama:qwen2.5:1.5b-instruct [split]] time-swap  (should read as: maybe)
+      was:  can we push it to 7:30 instead of 6? traffic is going to be awful
+      1:    Could we change it to 7:30 instead of 6? schedule
+      2:    can we push it to 7:30 instead of 6? time
+      3:    can we push it to 7:30 instead of 6? timing
+
+  [ollama:qwen2.5:1.5b-instruct [split]] rambling  (should read as: maybe)
+      was:  so i spoke to Ella and she reckons tuesday is better for everyone, but i also need to sort the car out that week and honestly im not sure ill have the money until payday, can we play it by ear
+      1:    so Ella said Tuesday's good for everyone But I also have to fix the car next week, and honestly, I'm not sure if I'll have the money until payday. let's figure it out
+      2:    so Ella thinks Tuesday is everyone's best choice But I also need to fix the car next week, and honestly, I'm not sure if I'll have the money until payday. let's be flexible
+      3:    so Ella reckons Tuesday is perfect for everyone But I also need to fix the car next week, and honestly, I'm not sure if I'll have the money until payday. let's adapt
+
+  [ollama:qwen2.5:1.5b-instruct [split]] slang  (should read as: no)
+      was:  nah im good mate, gonna stay in and watch the match
+      1:    Hey, just wanted to check in on how things are going. Stay in, mate. Let's watch the game.
+      2:    Hey, just checking in to make sure you're good. I'm gonna stay home and watch the match. See you later!
+      3:    Hey, just wanted to see how you're doing. Alright, I'm gonna keep it in for tonight. Let's go watch the game!
+
+  [ollama:qwen2.5:1.5b-instruct [split]] genuine-maybe  (should read as: maybe)
+      was:  not sure yet, depends if my shift changes. ill know by wednesday
+      1:    I'm still unsure, but my shift will change by Wednesday. I'll have it by Wednesday
+      2:    I'm not sure yet, but my shift will change by Wednesday. I'll know by Wednesday
+      3:    I'm not sure, but my shift will change by Wednesday. I'll let you know by Wednesday
+
+  [ollama:qwen2.5:1.5b-instruct [split]] boundary  (should read as: no)
+      was:  id rather not talk about it right now if thats alright
+      1:    I'd rather not discuss it now if that's okay.
+      2:    I'd prefer not to talk about it right now, if it's okay with you.
+      3:    I'd rather not discuss it at this time, if that's alright with you.
+
+  [ollama:qwen2.5:1.5b-instruct [split]] either-or  (should read as: maybe)
+      was:  are you still ok to give me a lift on sunday or shall i get the train
+      1:    Are you still okay for Sunday? Should I take the train?
+      2:    Could you still make it on Sunday? Should I catch the train?
+      3:    Would you still be available on Sunday? Should I take the train?
+
+  [ollama:qwen2.5:1.5b-instruct [split]] conditional  (should read as: yes-if)
+      was:  yes if we can finish by 4, otherwise ill have to skip it
+      1:    Yes, let's make sure we can finish by 4. Otherwise, I'll have to skip it.
+      2:    Absolutely, let's aim for 4 o'clock if possible. Otherwise, I'll have to cancel it.
+      3:    We'd better finish by 4, or I'll miss it. Otherwise, I'll have to abandon it.
+
+  [ollama:qwen2.5:1.5b-instruct [split]] deferring  (should read as: maybe)
+      was:  let me check with Sam and come back to you tomorrow
+      1:    I'll confirm with Sam and see you tomorrow.
+      2:    I'll check with Sam and see you tomorrow.
+      3:    I'll speak with Sam and meet you tomorrow.
+
+  [ollama:qwen2.5:1.5b-instruct [split]] no-then-yes  (should read as: no)
+      was:  cant do this week im afraid, next week any good?
+      1:    I'm afraid I can't do this week. Next week, any good? Next week, I hope you're available for a chat. Any good, I'm asking.
+      2:    I'm sorry, but I can't do this week. What about next week? Next week, I'm hoping the weather is good. Any good, I'm asking.
+      3:    I'm sorry, I can't do this week. Any good next week? Next week, I'm curious if you have any good ideas. Any good, I'm looking forward to it.
+
+  [ollama:qwen2.5:1.5b-instruct [split]] hearsay  (should read as: maybe)
+      was:  she said no but i think she might come round
+      1:    request
+      2:    demand
+      3:    proposal
+
+  [ollama:qwen2.5:1.5b-instruct [split]] waiting-on  (should read as: maybe)
+      was:  ill let you know once ive spoken to Priya
+      1:    I'll let you know as soon as I speak to Priya.
+      2:    I'll let you know shortly after I speak to Priya.
+      3:    I'll keep you updated as soon as I speak to Priya.
+
+  [ollama:qwen2.5:1.5b-instruct [split]] swap-days  (should read as: maybe)
+      was:  can we do wednesday instead of tuesday, ive got a thing
+      1:    Can we swap Wednesdays and Tuesdays? I've got something going on.
+      2:    What about Wednesday instead of Tuesday? I've got a date.
+      3:    Let's move Wednesday to Tuesday. I've got a reservation.
+
+  [ollama:qwen2.5:1.5b-instruct [split]] polite-no  (should read as: no)
+      was:  not really my thing to be honest but thanks for asking
+      1:    I'm not really into it
+      2:    It's not really my thing
+      3:    I'm not into it
+
+  [ollama:qwen2.5:1.5b-instruct [split]] rain-check  (should read as: no)
+      was:  im in bed already sorry, rain check?
+      1:    I'm already in bed and sorry, let's reschedule.
+      2:    I'm already in bed and sorry, let's reschedule.
+      3:    I'm already in bed and sorry, we can reschedule.
+
+  [ollama:qwen2.5:1.5b-instruct [split]] swamped  (should read as: no)
+      was:  sorry cant help this time, im completely swamped until the 20th
+      1:    Sorry, can't assist this time. I'm completely swamped until the 20th.
+      2:    I'm so sorry, but I can't help right now. I'm completely swamped until the 20th.
+      3:    I really appreciate it, but I can't assist this time. I'm completely swamped until the 20th.
+
+  [ollama:qwen2.5:1.5b-instruct [split]] confidence  (should read as: no)
+      was:  id rather we didnt tell anyone yet if thats ok
+      1:    I prefer not to inform anyone yet.
+      2:    It would be better not to inform anyone just yet.
+      3:    We should keep it a secret for now.
+
+  [ollama:qwen2.5:14b-instruct [split]] decline  (should read as: no)
+      was:  sorry i cant make saturday, ive got my sisters wedding. have a great time though
+      1:    can't make saturday ive got my sisters wedding have fun
+      2:    can't attend saturday my sister’s wedding conflict enjoy yourself
+      3:    unable saturday regrettably, scheduling conflict with my sister’s wedding hope you enjoy
+
+  [ollama:qwen2.5:14b-instruct [split]] time-swap  (should read as: maybe)
+      was:  can we push it to 7:30 instead of 6? traffic is going to be awful
+      1:    can we push it to 7:30 instead of 6? traffic bad
+      2:    can we push it to 7:30 instead of 6? traffic's gonna be rough
+      3:    can we push it to 7:30 instead of 6? the anticipated traffic conditions will be challenging
+
+  [ollama:qwen2.5:14b-instruct [split]] rambling  (should read as: maybe)
+      was:  so i spoke to Ella and she reckons tuesday is better for everyone, but i also need to sort the car out that week and honestly im not sure ill have the money until payday, can we play it by ear
+      1:    so i spoke to Ella and she reckons tuesday is better for everyone car issues, tight budget play by ear
+      2:    ella thinks tuesday works car troubles, unsure funds can we, please?
+      3:    ella recommends tuesday need to resolve car situation, financial constraints until payday could we, please?
+
+  [ollama:qwen2.5:14b-instruct [split]] slang  (should read as: no)
+      was:  nah im good mate, gonna stay in and watch the match
+      1:    nah im good staying in to watch the match
+      2:    i'm good, thanks looking forward to watching the match from home
+      3:    i am content, thank you will be remaining at home to view the match
+
+  [ollama:qwen2.5:14b-instruct [split]] genuine-maybe  (should read as: maybe)
+      was:  not sure yet, depends if my shift changes. ill know by wednesday
+      1:    not sure shift changes i know wednesday
+      2:    not sure, depends shift changes ill find out wednesday
+      3:    currently undetermined pending shift changes i will know by wednesday
+
+  [ollama:qwen2.5:14b-instruct [split]] boundary  (should read as: no)
+      was:  id rather not talk about it right now if thats alright
+      1:    prefer not
+      2:    not now, okay?
+      3:    i prefer not to at this time, if that is acceptable
+
+  [ollama:qwen2.5:14b-instruct [split]] either-or  (should read as: maybe)
+      was:  are you still ok to give me a lift on sunday or shall i get the train
+      1:    lift ok sunday?
+      2:    are you still up for giving me a lift on sunday or should i take the train?
+      3:    could i please confirm if you are still able to provide transportation for me on sunday, or should i arrange for an alternative method of travel?
+
+  [ollama:qwen2.5:14b-instruct [split]] conditional  (should read as: yes-if)
+      was:  yes if we can finish by 4, otherwise ill have to skip it
+      1:    yes if we can finish by 4 have to skip
+      2:    sounds good if we can wrap up by 4 miss out
+      3:    i am available provided we conclude by 4 pm be absent
+
+  [ollama:qwen2.5:14b-instruct [split]] deferring  (should read as: maybe)
+      was:  let me check with Sam and come back to you tomorrow
+      1:    check with Sam tomorrow
+      2:    will check with Sam and get back to you tomorrow
+      3:    I will consult with Sam and respond to you tomorrow
+
+  [ollama:qwen2.5:14b-instruct [split]] no-then-yes  (should read as: no)
+      was:  cant do this week im afraid, next week any good?
+      1:    can't this week next week any good?
+      2:    sorry, can't this week let’s try next week?
+      3:    unfortunately, i am unavailable this week is next week convenient?
+
+  [ollama:qwen2.5:14b-instruct [split]] hearsay  (should read as: maybe)
+      was:  she said no but i think she might come round
+      1:    she said no, thinks she might change her mind
+      2:    she said no, but maybe she'll reconsider
+      3:    she declined but may reconsider
+
+  [ollama:qwen2.5:14b-instruct [split]] waiting-on  (should read as: maybe)
+      was:  ill let you know once ive spoken to Priya
+      1:    let you know after talking to Priya
+      2:    ill let you know after i chat with Priya
+      3:    i will inform you once i have discussed with Priya
+
+  [ollama:qwen2.5:14b-instruct [split]] swap-days  (should read as: maybe)
+      was:  can we do wednesday instead of tuesday, ive got a thing
+      1:    can we do wednesday instead of tuesday ive got a thing
+      2:    how about wednesday instead of tuesday? sorry, i have something else
+      3:    may i suggest wednesday instead of tuesday? i am unavailable due to a prior commitment
+
+  [ollama:qwen2.5:14b-instruct [split]] polite-no  (should read as: no)
+      was:  not really my thing to be honest but thanks for asking
+      1:    not my thing, thanks
+      2:    not really my thing, but thanks for asking
+      3:    i regret to inform you that it is not my area of interest, thank you for considering me
+
+  [ollama:qwen2.5:14b-instruct [split]] rain-check  (should read as: no)
+      was:  im in bed already sorry, rain check?
+      1:    in bed sorry
+      2:    in bed already, sorry
+      3:    currently in bed, apologies
+
+  [ollama:qwen2.5:14b-instruct [split]] swamped  (should read as: no)
+      was:  sorry cant help this time, im completely swamped until the 20th
+      1:    can't help i'm swamped till the 20th
+      2:    sorry, can't help right now, i'm swamped i am swamped until the 20th, sorry about that
+      3:    i regret to inform you that i am unable to assist at this time i am unavailable until the 20th due to a full schedule
+
+  [ollama:qwen2.5:14b-instruct [split]] confidence  (should read as: no)
+      was:  id rather we didnt tell anyone yet if thats ok
+      1:    prefer silence
+      2:    how about we keep it quiet for now?
+      3:    could we refrain from sharing this information at this time?
+
+  [ollama:qwen2.5:7b-instruct [split]] decline  (should read as: no)
+      was:  sorry i cant make saturday, ive got my sisters wedding. have a great time though
+      1:    can't make saturday got my sister's wedding. go ahead and have a great time
+      2:    sorry about saturday, hope you have a great time anyway it's my sister's wedding, so i can't make it. enjoy yourself
+      3:    i regret i cannot attend on saturday I have my sister's wedding on Saturday. i hope you have a fantastic time
+
+  [ollama:qwen2.5:7b-instruct [split]] time-swap  (should read as: maybe)
+      was:  can we push it to 7:30 instead of 6? traffic is going to be awful
+      1:    can we push it to 7:30 instead of 6? traffic gonna be bad
+      2:    can we change the time to 7:30 instead of 6? i'm afraid the traffic will be horrendous this evening
+      3:    could we reschedule to 7:30 instead of 6? the traffic is expected to be particularly heavy this evening
+
+  [ollama:qwen2.5:7b-instruct [split]] rambling  (should read as: maybe)
+      was:  so i spoke to Ella and she reckons tuesday is better for everyone, but i also need to sort the car out that week and honestly im not sure ill have the money until payday, can we play it by ear
+      1:    so i spoke to Ella and she reckons tuesday is better for everyone but i've got to fix the car that week, and i'm not sure i'll have the cash until payday can we just see how things go?
+      2:    so i spoke to Ella and she reckons tuesday is better for everyone hey, i'm working on fixing the car this week, and honestly, i'm not sure i'll have the funds until payday let's keep it flexible, okay?
+      3:    so i spoke to Ella and she reckons tuesday is better for everyone I need to attend to the car issues this week, and I'm uncertain if I'll have the funds until payday could we play it by ear, please?
+
+  [ollama:qwen2.5:7b-instruct [split]] slang  (should read as: no)
+      was:  nah im good mate, gonna stay in and watch the match
+      1:    nah im good mate gonna stay in and watch the match
+      2:    nah, i'm doing great mate 👍 i'll be cozying up to watch the match, sounds good?
+      3:    i am well, thank you, and available if needed. i will be staying in to watch the match. i hope you enjoy it too.
+
+  [ollama:qwen2.5:7b-instruct [split]] genuine-maybe  (should read as: maybe)
+      was:  not sure yet, depends if my shift changes. ill know by wednesday
+      1:    not sure yet, depends on my shift. i'll have an update by wednesday
+      2:    hope my shift doesn't change, otherwise i might be able to make it. i'll let you know by wednesday
+      3:    it all depends on my shift schedule, so i'll let you know by Wednesday. i'll provide an update by wednesday
+
+  [ollama:qwen2.5:7b-instruct [split]] boundary  (should read as: no)
+      was:  id rather not talk about it right now if thats alright
+      1:    let's not talk about it now, if that's okay
+      2:    how about we skip discussing it for now, if that's alright
+      3:    could we maybe avoid talking about it right now, if that's okay?
+
+  [ollama:qwen2.5:7b-instruct [split]] either-or  (should read as: maybe)
+      was:  are you still ok to give me a lift on sunday or shall i get the train
+      1:    are you still good for a lift on sunday?
+      2:    are you free to give me a lift on sunday? i'd really appreciate it!
+      3:    could you give me a lift on sunday? if not, i'll catch the train.
+
+  [ollama:qwen2.5:7b-instruct [split]] conditional  (should read as: yes-if)
+      was:  yes if we can finish by 4, otherwise ill have to skip it
+      1:    4pm should work. otherwise, i'll have to skip it
+      2:    i'd be happy to finish up by 4pm! otherwise, i'll have to give it a miss
+      3:    Yes, if we can wrap up by 4pm. otherwise, i'll need to skip it
+
+  [ollama:qwen2.5:7b-instruct [split]] deferring  (should read as: maybe)
+      was:  let me check with Sam and come back to you tomorrow
+      1:    let me check with sam and get back to you tomorrow
+      2:    let me check with sam and give you an update tomorrow
+      3:    please allow me to check with sam and get back to you tomorrow
+
+  [ollama:qwen2.5:7b-instruct [split]] no-then-yes  (should read as: no)
+      was:  cant do this week im afraid, next week any good?
+      1:    cant do this week im afraid next week works for me if you're free.
+      2:    i'm sorry i can't make it this week, i hope next week works for you! next week would be great, if you're available.
+      3:    i regret that i will not be able to make it this week. may next week be more convenient for you. may i check next week's availability for you?
+
+  [ollama:qwen2.5:7b-instruct [split]] hearsay  (should read as: maybe)
+      was:  she said no but i think she might come round
+      1:    she said no, but i hope she'll change her mind
+      2:    she said no, but i'm optimistic she'll come around
+      3:    she said no, but i believe she might reconsider
+
+  [ollama:qwen2.5:7b-instruct [split]] waiting-on  (should read as: maybe)
+      was:  ill let you know once ive spoken to Priya
+      1:    ill let u know once i've spoken to priya
+      2:    i'll keep you in the loop once i've spoken to priya
+      3:    I will inform you once I have spoken to Priya.
+
+  [ollama:qwen2.5:7b-instruct [split]] swap-days  (should read as: maybe)
+      was:  can we do wednesday instead of tuesday, ive got a thing
+      1:    can we switch to wednesday instead of tuesday got a commitment on tuesday
+      2:    would wednesday work instead of tuesday, i have something then i'm sorry, i have a thing on tuesday
+      3:    may i suggest we reschedule to wednesday instead of tuesday, please I have a commitment on Tuesday
+
+  [ollama:qwen2.5:7b-instruct [split]] polite-no  (should read as: no)
+      was:  not really my thing to be honest but thanks for asking
+      1:    not really into it i guess but appreciate you checking in
+      2:    i appreciate you asking, but to be honest, it's not really my thing
+      3:    may i respectfully share that it's not really my thing, but thank you for asking
+
+  [ollama:qwen2.5:7b-instruct [split]] rain-check  (should read as: no)
+      was:  im in bed already sorry, rain check?
+      1:    already in bed, sorry, how about another time?
+      2:    goodnight, sorry about that, how about we reschedule?
+      3:    Good evening. I'm already in bed, so how about we do this another time?
+
+  [ollama:qwen2.5:7b-instruct [split]] swamped  (should read as: no)
+      was:  sorry cant help this time, im completely swamped until the 20th
+      1:    sorry, can't help this time completely swamped until the 20th
+      2:    i'm sorry, but i can't help this time i'm really swamped until the 20th, hope you understand
+      3:    i apologize, but i can't assist at this time I will be swamped until the 20th and will not be able to assist
+
+  [ollama:qwen2.5:7b-instruct [split]] confidence  (should read as: no)
+      was:  id rather we didnt tell anyone yet if thats ok
+      1:    id rather we didn't tell anyone yet if that's ok
+      2:    i'd really prefer we didn't tell anyone just yet, if that's okay
+      3:    i would prefer that we keep this between us for now, if that's acceptable
+
+  [ollama:remix-0.5b [split]] decline  (should read as: no)
+      was:  sorry i cant make saturday, ive got my sisters wedding. have a great time though
+      1:    i'm sorry i can't make it on saturday have a sister's wedding. great to see you all!
+      2:    i hope you have a great time saturday, but i can't make it i have a sister's wedding, so i'm not able to make it this Saturday. i hope you have a fantastic saturday!
+      3:    I regret that I will not be able to attend the event on Saturday I have a sister's wedding scheduled for this Saturday, so I won't be able to attend. i look forward to celebrating with you.
+
+  [ollama:remix-0.5b [split]] time-swap  (should read as: maybe)
+      was:  can we push it to 7:30 instead of 6? traffic is going to be awful
+      1:    can we push it to 7:30 instead of 6? traffic's bad right now
+      2:    hey, can we give the meeting a bit more time? 7:30 instead of 6? i hope we can push it to 7:30 instead of 6 for the traffic
+      3:    may we schedule the meeting for 7:30 instead of 6? Traffic is expected to be quite heavy at 7:30.
+
+  [ollama:remix-0.5b [split]] rambling  (should read as: maybe)
+      was:  so i spoke to Ella and she reckons tuesday is better for everyone, but i also need to sort the car out that week and honestly im not sure ill have the money until payday, can we play it by ear
+      1:    so i spoke to Ella and she reckons tuesday is better for everyone but i need to get the car fixed that week, and i'm unsure about when i'll have enough money. can we play it by ear
+      2:    i talked to ella and she thinks tuesday is the best time for everyone. i know you're busy this week, but i need to sort out the car for sure. i'm uncertain if i'll have the money until payday. sure, let's play it by ear
+      3:    we spoke with ella about tuesday and i agree it would be better for everyone. I also need to address the car issue for the coming week; I am unsure if I will have the funds available by then. could we play it by ear?
+
+  [ollama:remix-0.5b [split]] slang  (should read as: no)
+      was:  nah im good mate, gonna stay in and watch the match
+      1:    nah i'm good for a minute stay in and catch up on the match
+      2:    sure thing! i'll be right there when you get back from the match i'll keep it simple - stay in and watch the game
+      3:    I am available and will assist you with any questions or concerns. i will remain at home and watch the match
+
+  [ollama:remix-0.5b [split]] genuine-maybe  (should read as: maybe)
+      was:  not sure yet, depends if my shift changes. ill know by wednesday
+      1:    not sure yet, might change shifts. will get back to you by wednesday
+      2:    i'm not 100% sure yet, but i'll let you know if my shift changes. i'll have a moment of insight by wednesday
+      3:    I haven't made up my mind about it yet. My shift is set for Wednesday, so I won't be able to confirm until then. may i provide an update on my availability by wednesday
+
+  [ollama:remix-0.5b [split]] boundary  (should read as: no)
+      was:  id rather not talk about it right now if thats alright
+      1:    can't make it to that meeting right now
+      2:    i'd love to chat about it but i'm a bit tied up right now
+      3:    may i speak with you regarding this matter?
+
+  [ollama:remix-0.5b [split]] either-or  (should read as: maybe)
+      was:  are you still ok to give me a lift on sunday or shall i get the train
+      1:    sure, just check if you can give me a lift on sunday.
+      2:    i hope everything's okay with you. could you let me know if you'd be able to give me a lift on sunday?
+      3:    may i confirm that you are still available for a lift on Sunday?
+
+  [ollama:remix-0.5b [split]] conditional  (should read as: yes-if)
+      was:  yes if we can finish by 4, otherwise ill have to skip it
+      1:    4pm works for me. else i can't make it.
+      2:    sure, let's wrap up by 4pm. i'd really appreciate it if we could finish by 4.
+      3:    may i confirm that we can finish by 4pm? may i confirm that you can finish by 4?
+
+  [ollama:remix-0.5b [split]] deferring  (should read as: maybe)
+      was:  let me check with Sam and come back to you tomorrow
+      1:    let me check with sam and get back to you tomorrow
+      2:    hey sam, i'll give you a call later about that, let's chat tomorrow
+      3:    let me check with Sam and come back to you tomorrow
+
+  [ollama:remix-0.5b [split]] no-then-yes  (should read as: no)
+      was:  cant do this week im afraid, next week any good?
+      1:    can't make it this week, i'm a bit nervous. next week?
+      2:    i can't decide if i'll be able to make it this week, but next week sounds better for me. next week sounds great! how about next week?
+      3:    I regret that I cannot participate in this week's event. Next week would suit me much better. may i suggest we start this next week?
+
+  [ollama:remix-0.5b [split]] hearsay  (should read as: maybe)
+      was:  she said no but i think she might come round
+      1:    she said no but i think she might come round
+      2:    i hope you understand that she said no but i think she'll make it soon
+      3:    she said no, but I believe she might come round at some point
+
+  [ollama:remix-0.5b [split]] waiting-on  (should read as: maybe)
+      was:  ill let you know once ive spoken to Priya
+      1:    once i talk to priya
+      2:    i'll get back to you once we've talked to priya
+      3:    may i let you know when we speak with priya
+
+  [ollama:remix-0.5b [split]] swap-days  (should read as: maybe)
+      was:  can we do wednesday instead of tuesday, ive got a thing
+      1:    can we do wednesday instead of tuesday got a thing
+      2:    how about we go to wednesday instead of tuesday? i have something
+      3:    may we schedule our meeting for Wednesday instead of Tuesday? i've got a conflict
+
+  [ollama:remix-0.5b [split]] polite-no  (should read as: no)
+      was:  not really my thing to be honest but thanks for asking
+      1:    not really my thing to be honest, but i'd love to help out.
+      2:    thanks so much for asking, and i understand it's not my forte; still appreciate the question.
+      3:    Not really my thing to be honest, but I would be grateful if you could ask.
+
+  [ollama:remix-0.5b [split]] rain-check  (should read as: no)
+      was:  im in bed already sorry, rain check?
+      1:    i'm already in bed, i'm sorry about the rain check.
+      2:    i'm already in bed, and i apologize for being so late to this rain check.
+      3:    I am already in bed, and I apologize for my absence.
+
+  [ollama:remix-0.5b [split]] swamped  (should read as: no)
+      was:  sorry cant help this time, im completely swamped until the 20th
+      1:    can't help this time i'm totally swamped till the 20th.
+      2:    i'm sorry i can't help this time hope you understand i'm super busy until the 20th.
+      3:    I apologize for not being able to assist this time I am completely swamped until the 20th.
+
+  [ollama:remix-0.5b [split]] confidence  (should read as: no)
+      was:  id rather we didnt tell anyone yet if thats ok
+      1:    id rather not tell anyone yet if that works.
+      2:    hey, i'd appreciate it if we didn't let anyone know yet if that's okay for you.
+      3:    may i confirm that we should not disclose any information to others at this time?
+

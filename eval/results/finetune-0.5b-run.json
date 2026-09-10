@@ -1,0 +1,9 @@
+{
+  "base": "Qwen/Qwen2.5-0.5B-Instruct",
+  "examples": 4863,
+  "epochs": 3.0,
+  "lr": 0.0001,
+  "rank": 16,
+  "batch": 8,
+  "accum": 2
+}
