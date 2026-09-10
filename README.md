@@ -198,6 +198,17 @@ mapping on the message picks the right beat. All of that needs a device.
   This matters, because schema-constrained decoding was worth about sixty points
   of validity on the Ollama side of the eval. The Claude path does not get it
   for free.
+- **Split mode costs more on a paid API than the one-shot grid did.** One call
+  per beat means the system prompt is resent every time and thinking happens
+  every time, so a four-beat message is four to eight calls rather than one.
+  Roughly triple the old per-message estimate. The architecture was chosen for
+  a local model where per-call cost is zero, and it is the right shape there;
+  on the Claude path it is a real regression. Prompt caching does not save you,
+  because the system prompt sits below the minimum cacheable prefix.
+- **Beats are fetched sequentially, though they are independent.** On device
+  that is correct, since there is one accelerator. Against an API it means a
+  four-beat message waits four round trips when it could wait one. Worth
+  parallelising if the API path survives.
 - **No refusal handling.** An empty response is reported as "the model returned
   no text" rather than inspecting `stop_reason`. Server-side fallbacks are also
   not wired up.
