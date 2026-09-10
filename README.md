@@ -8,6 +8,29 @@ Two ways in: the selection toolbar of every app, via `ACTION_PROCESS_TEXT`,
 and a floating chat head. No accessibility service and no default-SMS role,
 so nothing Play review objects to.
 
+## The finding that shapes everything
+
+A model small enough to sit on a phone does this as well as one twenty-eight
+times larger, once the task is the right shape and the bookkeeping lives in
+code rather than in the prompt. Measured on fifty deliberately awkward
+messages, scored mechanically:
+
+| model | size | clean | median |
+|---|---|---|---|
+| Qwen 0.5B | 397 MB | 30% | 0.3s |
+| Qwen 1.5B | 986 MB | **74%** | 0.3s |
+| Qwen 7B | 4.7 GB | 68% | 0.5s |
+| Qwen 14B | 9.0 GB | **74%** | 16.5s |
+
+Two things follow. There is a ceiling near 74% that parameters do not move, so
+the remaining failures are not a capability problem. And a sub-gigabyte model
+reaches it, which is what makes running entirely on the phone a real option
+rather than a compromise.
+
+Nine of the 14B's thirteen remaining failures are the fact guarantee reverting
+a beat to the writer's own words, which is the design working rather than
+breaking. See `eval/` for how that is measured and why.
+
 ## Running it
 
 1. Open the folder in Android Studio. It will fetch the Gradle wrapper and write
