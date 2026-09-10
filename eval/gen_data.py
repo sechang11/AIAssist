@@ -1,7 +1,7 @@
 """Build a training set for the beat rewriter, using a large open model as
 teacher and the pipeline's own rules as the filter.
 
-Two stages, both resumable, because either can be interrupted:
+Three stages, all resumable, because any of them can be interrupted:
 
   1. Invent source messages. Not by asking for "500 text messages", which
      returns 500 variations of "sorry I'm late", but by crossing a taxonomy
@@ -13,12 +13,15 @@ Two stages, both resumable, because either can be interrupted:
      beats where nothing load-bearing was lost. The teacher is wrong sometimes,
      and a bad pair poisons training worse than a missing one does.
 
-    python gen_data.py messages --model qwen2.5:14b-instruct --per-cell 4
-    python gen_data.py beats    --model qwen2.5:14b-instruct
+  3. Pack what survived into chat triples the student can learn directly.
+
+    python gen_data.py messages --model qwen2.5:7b-instruct --per-cell 4
+    python gen_data.py beats    --model qwen2.5:7b-instruct
     python gen_data.py pack
 
-Output is train.jsonl: one line per beat, as a chat triple the student learns
-directly. Nothing here talks to a paid API.
+Requests run concurrently: served one at a time this takes hours, and Ollama
+batches happily as long as OLLAMA_NUM_PARALLEL is raised to match --workers.
+Nothing here talks to a paid API.
 """
 
 import argparse
@@ -27,7 +30,9 @@ import json
 import random
 import re
 import sys
+import threading
 import urllib.request
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
@@ -65,14 +70,16 @@ FACTS = [
     "at least three separate facts: a name, a time and a number",
 ]
 
+WRITE_LOCK = threading.Lock()
 
-def post(payload):
+
+def post(payload, timeout=600):
     request = urllib.request.Request(
         HOST + "/api/chat",
         data=json.dumps(payload).encode("utf-8"),
         headers={"Content-Type": "application/json"},
     )
-    with urllib.request.urlopen(request, timeout=600) as response:
+    with urllib.request.urlopen(request, timeout=timeout) as response:
         return json.loads(response.read())["message"]["content"]
 
 
@@ -112,17 +119,14 @@ MESSAGE_SCHEMA = {
 }
 
 
-def stage_messages(model, per_cell, limit):
+def stage_messages(model, per_cell, limit, workers):
     DATA.mkdir(exist_ok=True)
     out_path = DATA / "sources.jsonl"
 
     seen = set()
-    existing = []
     if out_path.exists():
         for line in out_path.open(encoding="utf-8"):
-            row = json.loads(line)
-            existing.append(row)
-            seen.add(normalise(row["text"]))
+            seen.add(normalise(json.loads(line)["text"]))
     # The eval set must never leak into training or the score means nothing.
     for line in (HERE / "messages.jsonl").open(encoding="utf-8"):
         seen.add(normalise(json.loads(line)["text"]))
@@ -130,109 +134,122 @@ def stage_messages(model, per_cell, limit):
     cells = list(itertools.product(INTENTS, RELATIONSHIPS, REGISTERS, LENGTHS, FACTS))
     random.Random(7).shuffle(cells)
     cells = cells[:limit]
+    print(f"{len(cells)} cells x {per_cell} messages, {workers} workers")
 
-    print(f"{len(cells)} cells x {per_cell} messages, {len(existing)} already held")
-    with out_path.open("a", encoding="utf-8") as out:
-        for i, (intent, who, register, length, facts) in enumerate(cells, 1):
-            ask = (
-                f"Write {per_cell} different text messages, all of them {intent}, "
-                f"sent to {who}. Style: {register}. Length: {length}. "
-                f"Each message must have {facts}."
-            )
-            try:
-                raw = post({
-                    "model": model, "stream": False,
-                    "options": {"temperature": 1.0, "top_p": 0.95, "num_predict": 500},
-                    "format": MESSAGE_SCHEMA,
-                    "messages": [
-                        {"role": "system", "content": MESSAGE_SYSTEM},
-                        {"role": "user", "content": ask},
-                    ],
-                })
-            except Exception as e:
-                print(f"  {i}: call failed, {e}")
-                continue
+    def fetch(cell):
+        intent, who, register, length, facts = cell
+        ask = (
+            f"Write {per_cell} different text messages, all of them {intent}, "
+            f"sent to {who}. Style: {register}. Length: {length}. "
+            f"Each message must have {facts}."
+        )
+        try:
+            raw = post({
+                "model": model, "stream": False,
+                "options": {"temperature": 1.0, "top_p": 0.95, "num_predict": 500},
+                "format": MESSAGE_SCHEMA,
+                "messages": [
+                    {"role": "system", "content": MESSAGE_SYSTEM},
+                    {"role": "user", "content": ask},
+                ],
+            })
+        except Exception:
+            return cell, []
+        return cell, (parse_obj(raw) or {}).get("messages", [])
 
-            parsed = parse_obj(raw) or {}
-            kept = 0
-            for text in parsed.get("messages", []):
-                text = " ".join(str(text).split()).strip()
-                if not (8 <= len(text) <= 400):
-                    continue
-                key = normalise(text)
-                if key in seen:
-                    continue
-                seen.add(key)
-                out.write(json.dumps({
-                    "text": text, "intent": intent, "who": who,
-                    "register": register, "length": length, "facts": facts,
-                }) + "\n")
-                kept += 1
-            out.flush()
-            if i % 10 == 0 or kept == 0:
-                print(f"  {i}/{len(cells)}  kept {kept}  total {len(seen)}")
+    done = 0
+    with out_path.open("a", encoding="utf-8") as out, ThreadPoolExecutor(workers) as pool:
+        for future in as_completed(pool.submit(fetch, c) for c in cells):
+            cell, messages = future.result()
+            intent, who, register, length, facts = cell
+            with WRITE_LOCK:
+                for text in messages:
+                    text = " ".join(str(text).split()).strip()
+                    if not (8 <= len(text) <= 400):
+                        continue
+                    key = normalise(text)
+                    if key in seen:
+                        continue
+                    seen.add(key)
+                    out.write(json.dumps({
+                        "text": text, "intent": intent, "who": who,
+                        "register": register, "length": length, "facts": facts,
+                    }) + "\n")
+                out.flush()
+                done += 1
+                if done % 20 == 0:
+                    print(f"  {done}/{len(cells)} cells, {len(seen)} distinct", flush=True)
 
     print(f"wrote {out_path}")
 
 
 # ---- stage 2: teacher beats -------------------------------------------------
 
-def stage_beats(model, limit):
+def stage_beats(model, limit, workers):
     sources = [json.loads(l) for l in (DATA / "sources.jsonl").open(encoding="utf-8")]
     out_path = DATA / "beats.jsonl"
 
-    done = set()
+    done_pairs = set()
     if out_path.exists():
         for line in out_path.open(encoding="utf-8"):
-            done.add(json.loads(line)["source"])
+            row = json.loads(line)
+            done_pairs.add((row["source"], row["fragment"]))
 
-    todo = [s for s in sources if s["text"] not in done][:limit]
-    print(f"{len(sources)} sources, {len(done)} already done, {len(todo)} to go")
+    jobs = []
+    for source in sources[:limit]:
+        whole = source["text"]
+        for fragment in pipeline.split_beats(whole):
+            if (whole, fragment) not in done_pairs:
+                jobs.append((whole, fragment))
+    print(f"{len(sources)} sources -> {len(jobs)} beats to fetch, {workers} workers")
 
-    kept = dropped = 0
-    with out_path.open("a", encoding="utf-8") as out:
-        for i, source in enumerate(todo, 1):
-            whole = source["text"]
-            for fragment in pipeline.split_beats(whole):
-                try:
-                    raw = post({
-                        "model": model, "stream": False,
-                        "options": {"temperature": 0.6, "num_predict": 300},
-                        "format": pipeline.schema(),
-                        "messages": [
-                            {"role": "system", "content": pipeline.system()},
-                            {"role": "user", "content": pipeline.user(whole, fragment)},
-                        ],
-                    })
-                except Exception:
-                    continue
+    def fetch(job):
+        whole, fragment = job
+        try:
+            raw = post({
+                "model": model, "stream": False,
+                "options": {"temperature": 0.6, "num_predict": 300},
+                "format": pipeline.schema(),
+                "messages": [
+                    {"role": "system", "content": pipeline.system()},
+                    {"role": "user", "content": pipeline.user(whole, fragment)},
+                ],
+            })
+        except Exception:
+            return job, None
+        return job, parse_obj(raw)
 
-                answer = parse_obj(raw)
-                alternatives = (answer or {}).get("alternatives") or []
-                # The filter. A teacher answer that lost a name or a time is
-                # exactly the behaviour we are trying to train out.
-                if len(alternatives) != len(pipeline.TONES):
+    kept = dropped = seen = 0
+    with out_path.open("a", encoding="utf-8") as out, ThreadPoolExecutor(workers) as pool:
+        for future in as_completed(pool.submit(fetch, j) for j in jobs):
+            (whole, fragment), answer = future.result()
+            alternatives = (answer or {}).get("alternatives") or []
+
+            # The filter. A teacher answer that lost a name or a time is exactly
+            # the behaviour we are trying to train out, so it must not be taught.
+            bad = (
+                len(alternatives) != len(pipeline.TONES)
+                or any(pipeline.lost_tokens(fragment, a) for a in alternatives)
+                or len({a.strip().lower() for a in alternatives}) < len(alternatives)
+            )
+            with WRITE_LOCK:
+                seen += 1
+                if bad:
                     dropped += 1
-                    continue
-                if any(pipeline.lost_tokens(fragment, a) for a in alternatives):
-                    dropped += 1
-                    continue
-                if len({a.strip().lower() for a in alternatives}) < len(alternatives):
-                    dropped += 1
-                    continue
+                else:
+                    out.write(json.dumps({
+                        "source": whole, "fragment": fragment,
+                        "label": (answer.get("label") or "part")[:40],
+                        "optional": bool(answer.get("optional", False)),
+                        "alternatives": alternatives,
+                    }) + "\n")
+                    kept += 1
+                if seen % 100 == 0:
+                    out.flush()
+                    print(f"  {seen}/{len(jobs)}  kept {kept}  dropped {dropped}", flush=True)
 
-                out.write(json.dumps({
-                    "source": whole, "fragment": fragment,
-                    "label": (answer.get("label") or "part")[:40],
-                    "optional": bool(answer.get("optional", False)),
-                    "alternatives": alternatives,
-                }) + "\n")
-                kept += 1
-            out.flush()
-            if i % 20 == 0:
-                print(f"  {i}/{len(todo)}  kept {kept}  dropped {dropped}")
-
-    print(f"kept {kept}, dropped {dropped} ({100 * dropped / max(kept + dropped, 1):.0f}% rejected)")
+    total = kept + dropped
+    print(f"kept {kept}, dropped {dropped} ({100 * dropped / max(total, 1):.0f}% rejected)")
 
 
 # ---- stage 3: pack for training --------------------------------------------
@@ -261,15 +278,16 @@ def stage_pack():
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("stage", choices=["messages", "beats", "pack"])
-    ap.add_argument("--model", default="qwen2.5:14b-instruct")
+    ap.add_argument("--model", default="qwen2.5:7b-instruct")
     ap.add_argument("--per-cell", type=int, default=4)
     ap.add_argument("--limit", type=int, default=200)
+    ap.add_argument("--workers", type=int, default=6)
     args = ap.parse_args()
 
     if args.stage == "messages":
-        stage_messages(args.model, args.per_cell, args.limit)
+        stage_messages(args.model, args.per_cell, args.limit, args.workers)
     elif args.stage == "beats":
-        stage_beats(args.model, args.limit)
+        stage_beats(args.model, args.limit, args.workers)
     else:
         stage_pack()
 
