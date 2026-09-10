@@ -43,7 +43,10 @@ def shape_ok(grid):
     slots = grid.get("slots")
     if not isinstance(tones, list) or len(tones) < 2:
         return False
-    if not isinstance(slots, list) or len(slots) < 2:
+    # One slot is legitimate under split mode: some messages really are a single
+    # beat, and the splitter decides that in code rather than the model choosing
+    # it to make its own life easier.
+    if not isinstance(slots, list) or len(slots) < 1:
         return False
     for slot in slots:
         alts = slot.get("alternatives") if isinstance(slot, dict) else None
