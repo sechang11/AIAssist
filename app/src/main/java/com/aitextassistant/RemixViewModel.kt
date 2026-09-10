@@ -11,12 +11,15 @@ import com.aitextassistant.generate.GenerationException
 import com.aitextassistant.generate.VariantGenerator
 import com.aitextassistant.remix.Remix
 import com.aitextassistant.remix.Slot
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 sealed interface RemixUiState {
     data object Idle : RemixUiState
     data object Loading : RemixUiState
-    data class Ready(val remix: Remix) : RemixUiState
+
+    /** [streaming] is true while later beats are still arriving. */
+    data class Ready(val remix: Remix, val streaming: Boolean = false) : RemixUiState
     data class Failed(val message: String) : RemixUiState
 }
 
@@ -28,6 +31,8 @@ class RemixViewModel(private val generator: VariantGenerator) : ViewModel() {
     var state: RemixUiState by mutableStateOf(RemixUiState.Idle)
         private set
 
+    private var work: Job? = null
+
     /** Ignores a repeat call for text already loaded, so rotation does not re-bill. */
     fun load(text: String) {
         val trimmed = text.trim()
@@ -37,15 +42,37 @@ class RemixViewModel(private val generator: VariantGenerator) : ViewModel() {
         }
         if (trimmed == original && state !is RemixUiState.Idle && state !is RemixUiState.Failed) return
 
+        work?.cancel()
         original = trimmed
         state = RemixUiState.Loading
-        viewModelScope.launch {
-            state = try {
-                RemixUiState.Ready(Remix(generator.generate(trimmed)))
+
+        work = viewModelScope.launch {
+            var carried: Remix? = null
+            try {
+                generator.generate(trimmed).collect { draft ->
+                    val validated = draft.validated() ?: return@collect
+                    // Beats arrive one at a time. Rebase so a pick the reader
+                    // already made survives the next redraw.
+                    val next = carried?.rebasedOn(validated) ?: Remix(validated)
+                    carried = next
+                    state = RemixUiState.Ready(next, streaming = true)
+                }
+                val finished = carried
+                state = if (finished == null) {
+                    RemixUiState.Failed("Nothing usable came back.")
+                } else {
+                    RemixUiState.Ready(finished, streaming = false)
+                }
             } catch (e: GenerationException) {
-                RemixUiState.Failed(e.message ?: "Something went wrong.")
+                // Whatever arrived before the failure is still worth showing.
+                val partial = carried
+                state = if (partial != null) {
+                    RemixUiState.Ready(partial, streaming = false)
+                } else {
+                    RemixUiState.Failed(e.message ?: "Something went wrong.")
+                }
             } catch (e: Exception) {
-                RemixUiState.Failed(e.message ?: "Something went wrong.")
+                state = RemixUiState.Failed(e.message ?: "Something went wrong.")
             }
         }
     }
@@ -57,13 +84,14 @@ class RemixViewModel(private val generator: VariantGenerator) : ViewModel() {
     }
 
     fun reset() {
+        work?.cancel()
         original = ""
         state = RemixUiState.Idle
     }
 
     private fun edit(block: (Remix) -> Remix) {
         val current = state as? RemixUiState.Ready ?: return
-        state = RemixUiState.Ready(block(current.remix))
+        state = current.copy(remix = block(current.remix))
     }
 
     fun choose(slot: Slot, index: Int) = edit { it.choose(slot, index) }

@@ -64,6 +64,21 @@ data class Remix(
 
     val openSlot: Slot? get() = draft.slots.firstOrNull { it.id == open }
 
+    /**
+     * Carries the reader's picks onto a longer draft. Beats stream in one at a
+     * time, so a redraw must not undo a choice they already made, or reopen a
+     * beat they closed.
+     */
+    fun rebasedOn(newDraft: RemixDraft): Remix {
+        val ids = newDraft.slots.map { it.id }.toSet()
+        return Remix(
+            draft = newDraft,
+            choice = newDraft.slots.associate { it.id to (choice[it.id] ?: 0) },
+            dropped = dropped.intersect(ids),
+            open = open?.takeIf { it in ids },
+        )
+    }
+
     fun indexOf(slot: Slot): Int = (choice[slot.id] ?: 0).coerceIn(0, slot.alternatives.lastIndex)
 
     fun textOf(slot: Slot): String = slot.alternatives[indexOf(slot)]

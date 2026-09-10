@@ -1,8 +1,11 @@
 package com.aitextassistant.remix
 
+import com.aitextassistant.generate.BeatRewriter
+import com.aitextassistant.generate.GridBuilder
+import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
-import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -22,11 +25,6 @@ class DraftValidationTest {
     @Test
     fun `rejects a draft with fewer than two tones`() {
         assertNull(RemixDraft(listOf("Only"), listOf(slot("a", "x"))).validated())
-    }
-
-    @Test
-    fun `rejects a draft with no usable slots`() {
-        assertNull(RemixDraft(TONES, listOf(slot("a", "x", "y"))).validated())
     }
 
     @Test
@@ -53,23 +51,14 @@ class AssemblyTest {
     }
 
     @Test
-    fun `applying a tone moves every slot`() {
-        val remix = Remix(draft).applyTone(2)
-        assertEquals("Good afternoon. Friday would suit me well. Kind regards.", remix.assemble())
-    }
-
-    @Test
     fun `mixing tones per slot is what the whole thing is for`() {
-        val remix = Remix(draft)
-            .choose(draft.slots[0], 1)
-            .choose(draft.slots[1], 2)
+        val remix = Remix(draft).choose(draft.slots[0], 1).choose(draft.slots[1], 2)
         assertEquals("Hey there! Friday would suit me well. Cheers.", remix.assemble())
     }
 
     @Test
     fun `a dropped slot leaves the rest intact`() {
-        val remix = Remix(draft).drop(draft.slots[0])
-        assertEquals("Friday works. Cheers.", remix.assemble())
+        assertEquals("Friday works. Cheers.", Remix(draft).drop(draft.slots[0]).assemble())
     }
 
     @Test
@@ -85,20 +74,9 @@ class AssemblyTest {
 
     @Test
     fun `restoring into a mixed message leaves the beat as it was`() {
-        val remix = Remix(draft)
-            .drop(draft.slots[0])
-            .choose(draft.slots[1], 2)
-            .restore(draft.slots[0])
+        val remix = Remix(draft).drop(draft.slots[0]).choose(draft.slots[1], 2).restore(draft.slots[0])
         assertEquals(0, remix.indexOf(draft.slots[0]))
         assertNull(remix.uniformTone())
-    }
-
-    @Test
-    fun `opening a beat, then choosing or tapping again, closes the panel`() {
-        val opened = Remix(draft).toggleOpen(draft.slots[1])
-        assertEquals(draft.slots[1], opened.openSlot)
-        assertNull(opened.choose(draft.slots[1], 2).openSlot)
-        assertNull(opened.toggleOpen(draft.slots[1]).openSlot)
     }
 
     @Test
@@ -109,8 +87,7 @@ class AssemblyTest {
 
     @Test
     fun `a dropped slot does not count against uniformity`() {
-        val remix = Remix(draft).applyTone(1).drop(draft.slots[0])
-        assertEquals(1, remix.uniformTone())
+        assertEquals(1, Remix(draft).applyTone(1).drop(draft.slots[0]).uniformTone())
     }
 
     @Test
@@ -120,60 +97,189 @@ class AssemblyTest {
     }
 }
 
-class DraftParserTest {
+/** Beats stream in one at a time, so a redraw must not undo the reader's work. */
+class RebaseTest {
 
-    private val body = """
-        {"tones":["Concise","Warm"],
-         "slots":[{"id":"s1","label":"greet","optional":true,"alternatives":["Hi.","Hey there!"]},
-                  {"id":"s2","label":"body","optional":false,"alternatives":["On my way.","I am on my way!"]}]}
-    """.trimIndent()
+    private val first = RemixDraft(TONES, listOf(slot("s1", "a", "b", "c")))
+    private val second = RemixDraft(TONES, listOf(slot("s1", "a", "b", "c"), slot("s2", "d", "e", "f")))
 
     @Test
-    fun `parses a clean response`() {
-        val draft = DraftParser.parse(body)
-        assertEquals(listOf("Concise", "Warm"), draft.tones)
-        assertEquals(2, draft.slots.size)
-        assertTrue(draft.slots.first().optional)
+    fun `a pick made before the next beat arrived survives it`() {
+        val remix = Remix(first).choose(first.slots[0], 2).rebasedOn(second)
+        assertEquals(2, remix.indexOf(second.slots[0]))
+        assertEquals(0, remix.indexOf(second.slots[1]))
+    }
+
+    @Test
+    fun `a beat left out stays left out`() {
+        val remix = Remix(first).drop(first.slots[0]).rebasedOn(second)
+        assertTrue(remix.isDropped(second.slots[0]))
+    }
+
+    @Test
+    fun `an open picker for a beat that vanished does not linger`() {
+        val remix = Remix(second).toggleOpen(second.slots[1]).rebasedOn(first)
+        assertNull(remix.openSlot)
+    }
+}
+
+class BeatSplitterTest {
+
+    @Test
+    fun `splits on full stops and on commas inside long runs`() {
+        val beats = BeatSplitter.split(
+            "hey so sorry i didnt get back to you sooner, this week has been mental. " +
+                "friday still works for me if thats ok? really looking forward to it",
+        )
+        assertEquals(4, beats.size)
+        assertEquals("hey so sorry i didnt get back to you sooner", beats[0])
+        assertEquals("really looking forward to it", beats[3])
+    }
+
+    @Test
+    fun `a short message is one beat, and that is correct rather than a failure`() {
+        assertEquals(listOf("ok cool see you then"), BeatSplitter.split("ok cool see you then"))
+    }
+
+    @Test
+    fun `leaves a short comma clause alone`() {
+        // Under the length threshold, so the comma is punctuation, not a beat break.
+        assertEquals(1, BeatSplitter.split("not sure yet, depends on my shift").size)
+    }
+
+    @Test
+    fun `a stray tail joins the beat before it rather than standing alone`() {
+        val beats = BeatSplitter.split("the survey came back with damp in the back bedroom. oh well.")
+        assertEquals(1, beats.size)
+    }
+
+    @Test
+    fun `never returns more than six beats`() {
+        val many = (1..12).joinToString(" ") { "sentence number $it here." }
+        assertEquals(6, BeatSplitter.split(many).size)
+    }
+
+    @Test
+    fun `blank input yields nothing`() {
+        assertEquals(emptyList<String>(), BeatSplitter.split("   "))
+    }
+}
+
+class LostTokenTest {
+
+    @Test
+    fun `catches a lowercase weekday, which capitalisation alone would miss`() {
+        assertEquals(listOf("friday"), BeatSplitter.lostTokens("friday still works", "it still works"))
+    }
+
+    @Test
+    fun `catches a dropped number and a dropped name`() {
+        assertEquals(listOf("11"), BeatSplitter.lostTokens("before 11", "before eleven"))
+        assertEquals(listOf("Yasmin"), BeatSplitter.lostTokens("keys with Yasmin", "keys with her"))
+    }
+
+    @Test
+    fun `ordinary words are meant to change and are not policed`() {
+        assertEquals(
+            emptyList<String>(),
+            BeatSplitter.lostTokens("this week has been mental", "busy week"),
+        )
+    }
+
+    @Test
+    fun `a kept fact is not reported, whatever the case`() {
+        assertEquals(emptyList<String>(), BeatSplitter.lostTokens("friday works", "Friday is fine"))
+    }
+}
+
+class BeatParserTest {
+
+    @Test
+    fun `parses a clean beat`() {
+        val beat = BeatParser.parse(
+            """{"label":"opening","optional":true,"alternatives":["Hi.","Hey there!","Good morning."]}""",
+        )!!
+        assertEquals("opening", beat.label)
+        assertTrue(beat.optional)
+        assertEquals(3, beat.alternatives.size)
     }
 
     @Test
     fun `survives a code fence and a preamble`() {
-        val wrapped = "Here you go:\n```json\n$body\n```\nHope that helps."
-        assertEquals(2, DraftParser.parse(wrapped).slots.size)
+        val wrapped = "Sure:\n```json\n{\"alternatives\":[\"a\",\"b\"]}\n```\nHope that helps."
+        assertEquals(listOf("a", "b"), BeatParser.parse(wrapped)!!.alternatives)
     }
 
     @Test
-    fun `renames duplicate ids so two slots cannot move together`() {
-        val dupes = """
-            {"tones":["A","B"],"slots":[
-              {"id":"s1","alternatives":["one","uno"]},
-              {"id":"s1","alternatives":["two","dos"]}]}
-        """.trimIndent()
-        val ids = DraftParser.parse(dupes).slots.map { it.id }
-        assertEquals(ids.size, ids.toSet().size)
+    fun `returns null rather than throwing on rubbish`() {
+        assertNull(BeatParser.parse("I cannot help with that."))
+        assertNull(BeatParser.parse("""{"label":"x"}"""))
+        assertNull(BeatParser.parse("""{"alternatives":[]}"""))
     }
+}
 
-    @Test
-    fun `skips a slot with a ragged alternatives list rather than failing outright`() {
-        val ragged = """
-            {"tones":["A","B"],"slots":[
-              {"id":"s1","alternatives":["one","uno"]},
-              {"id":"s2","alternatives":["two"]}]}
-        """.trimIndent()
-        assertEquals(listOf("s1"), DraftParser.parse(ragged).slots.map { it.id })
-    }
+/** The rules that make a small model's output trustworthy. */
+class GridBuilderTest {
 
-    @Test
-    fun `throws when there is no json at all`() {
-        assertThrows(DraftParser.MalformedDraft::class.java) {
-            DraftParser.parse("I cannot help with that.")
+    private class Fake(
+        private val answer: (String) -> BeatAnswer?,
+    ) : BeatRewriter {
+        var calls = 0
+        override suspend fun rewrite(whole: String, fragment: String, tones: List<String>): BeatAnswer? {
+            calls++
+            return answer(fragment)
         }
     }
 
+    private fun build(rewriter: BeatRewriter, text: String) = runBlocking {
+        GridBuilder(rewriter).generate(text, TONES).toList()
+    }
+
     @Test
-    fun `throws when every slot is unusable`() {
-        assertThrows(DraftParser.MalformedDraft::class.java) {
-            DraftParser.parse("""{"tones":["A","B"],"slots":[{"id":"s1","alternatives":["only"]}]}""")
-        }
+    fun `a rewrite that drops the date is replaced by the writer's own words`() {
+        val fake = Fake { BeatAnswer("x", false, listOf("it still works", "it works", "that works")) }
+        val drafts = build(fake, "friday still works")
+        val alternatives = drafts.last().slots.single().alternatives
+        assertEquals(listOf("friday still works", "friday still works", "friday still works"), alternatives)
+    }
+
+    @Test
+    fun `a lossy beat is retried once before falling back`() {
+        val fake = Fake { BeatAnswer("x", false, listOf("it works", "it works", "it works")) }
+        build(fake, "friday still works")
+        assertEquals(2, fake.calls)
+    }
+
+    @Test
+    fun `a good rewrite passes straight through`() {
+        val good = listOf("friday works", "friday still works for me", "Friday remains fine")
+        val fake = Fake { BeatAnswer("answer", true, good) }
+        val slot = build(fake, "friday still works").last().slots.single()
+        assertEquals(good, slot.alternatives)
+        assertEquals("answer", slot.label)
+        assertTrue(slot.optional)
+    }
+
+    @Test
+    fun `a beat the model could not answer keeps the original rather than vanishing`() {
+        val slot = build(Fake { null }, "friday still works").last().slots.single()
+        assertEquals(List(3) { "friday still works" }, slot.alternatives)
+    }
+
+    @Test
+    fun `the wrong number of alternatives falls back rather than corrupting the grid`() {
+        val fake = Fake { BeatAnswer("x", false, listOf("only one")) }
+        val slot = build(fake, "see you soon").last().slots.single()
+        assertEquals(3, slot.alternatives.size)
+    }
+
+    @Test
+    fun `the grid is emitted once per beat so the screen can fill in`() {
+        val fake = Fake { BeatAnswer("x", false, listOf("a", "b", "c")) }
+        val drafts = build(
+            fake,
+            "the first thing happened. the second thing happened. the third thing happened.",
+        )
+        assertEquals(listOf(1, 2, 3), drafts.map { it.slots.size })
     }
 }

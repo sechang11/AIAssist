@@ -4,9 +4,9 @@ An Android prototype of the mix-and-match rewriting idea: select a message you
 already wrote, in any app, and get several phrasings you can combine beat by beat
 before sending.
 
-Entry point is `ACTION_PROCESS_TEXT`, so the app appears in the floating
-selection toolbar of every app on the phone. No accessibility service, no
-overlay permission, no default-SMS role, nothing Play review objects to.
+Two ways in: the selection toolbar of every app, via `ACTION_PROCESS_TEXT`,
+and a floating chat head. No accessibility service and no default-SMS role,
+so nothing Play review objects to.
 
 ## Running it
 
@@ -18,14 +18,15 @@ overlay permission, no default-SMS role, nothing Play review objects to.
    ANTHROPIC_API_KEY=sk-ant-...
    ```
 
-   Without a key the app runs `StubVariantGenerator`, which does mechanical
-   string edits offline. The grid fills, the interaction works, the writing is
-   bad on purpose.
+   Without a key the app runs `StubBeatRewriter`, which does mechanical string
+   edits offline. The grid fills, the interaction works, the writing is bad on
+   purpose.
 3. Run on a device, then select text in any messaging app and look for **Remix**
    in the selection toolbar, possibly behind the overflow arrow.
 
 `MainActivity` has a playground so you can exercise the screen without leaving
-the app. Unit tests cover the assembly and parsing logic:
+the app. Unit tests cover the splitter, the fact guarantee, assembly, parsing
+and the rebasing that keeps your picks while later beats stream in:
 
 ```powershell
 .\gradlew.bat testDebugUnitTest
@@ -33,45 +34,43 @@ the app. Unit tests cover the assembly and parsing logic:
 
 ## How the remix works
 
-The obvious design is to generate three rewrites and then align them into
-swappable parts. Alignment is where that design dies: one version merges two
-sentences, another splits one, and the parts drift out of sync.
+The obvious design is one call that returns the whole grid: rows are beats,
+columns are tones. That is what this started as, and measurement killed it.
 
-So the model is asked for the aligned structure directly. It returns a grid:
+`eval/` runs twenty deliberately awkward messages through a model and scores
+what comes back. Against Qwen 1.5B, the size a phone can carry, the one-shot
+grid scored 5% clean. The output was never bad English; validity was 100% while
+the content was wrong. Asking one pass to segment, paraphrase, keep every cell
+independent and preserve every fact is a bookkeeping problem, and the
+bookkeeping is what a small model cannot hold.
 
-| slot | Concise | Warm | Formal |
-|---|---|---|---|
-| greeting | Hey. | Hey there! | Good afternoon. |
-| answer | Friday works. | Friday works great for me. | Friday would suit me well. |
-| sign-off | Cheers. | See you then! | Kind regards. |
+So the bookkeeping moved into code, and the same model scored 65%.
 
-Reading a column top to bottom gives a coherent whole message, which is the
-"three versions" part. Picking a different column per row is the mix-and-match
-part. There is no alignment step to get wrong.
+`BeatSplitter` cuts the message into beats with punctuation and length alone. No
+model, so it cannot hallucinate a beat or drop a clause, and five of the twenty
+test messages are correctly a single beat. `GridBuilder` then asks for three
+phrasings of one short fragment at a time, which is the job small models are
+actually good at.
 
-The constraint that makes mixing safe lives in `Prompt.SYSTEM`: alternatives may
-not depend on the wording of a neighbouring slot or repeat what a neighbour
-says. That is the sentence to tune first when a mixed draft reads badly.
+Two failure modes now go by construction rather than by instruction. Beats
+cannot repeat each other, because a beat never sees its neighbours' output;
+that measure went from 15% to 95%. And a lossy beat is cheap to retry alone
+rather than discarding the whole message.
+
+Then the guarantee: if a rewrite loses a date, time, number or name that was in
+the fragment, it is not shown at all and that beat falls back to the writer's
+own words. Losing the retoning on one beat is a far smaller harm than losing
+the time they agreed to meet, and an unchanged beat is visibly unchanged.
+
+Beats stream to the screen as they land, which the interface already suited,
+since they are independent by design.
+
+`eval/pipeline.py` and `BeatSplitter`/`GridBuilder` are the same algorithm in
+two languages. If you change one, change the other, or the eval numbers stop
+predicting what the app does.
 
 `Slot.optional` marks beats the message survives without, and only those get a
 Skip control, so the core content cannot be dropped by a stray tap.
-
-## The screen
-
-The message is the interface. Rather than a list of cards plus a separate
-preview underneath, which means reading the same message twice, the draft is
-shown as flowing prose with each beat highlighted. Tap a beat and its
-alternatives open in the panel below; tap a tone chip and the whole message
-swaps. What sits in the card is exactly what Replace hands back.
-
-Restoring a beat you left out adopts whatever tone the rest of the message has
-settled on, so an old phrasing never reappears inside a draft you have since
-retoned. `RemixTest` covers that case.
-
-Design mockups of all four screens, including the two that are not built yet,
-are in `design/`. Open `design/remix-concept.html` in a browser: the remix
-screen there is clickable. `design/*.dc.html` are the same screens as canvas
-artboards.
 
 ## How it lives on the phone
 
@@ -143,9 +142,10 @@ anyone can pull the key out of the artifact. That is acceptable for a debug
 build on your own phone and unacceptable the moment someone else installs it.
 
 The fix is a server you own that holds the key, applies your own rate limits,
-and exposes one endpoint. `ClaudeVariantGenerator` is the only file that talks
-to the SDK, and the client builder has a commented-out `.baseUrl(...)` for
-exactly this.
+and exposes one endpoint. `ClaudeBeatRewriter` is the only file that talks to
+the SDK, and the client builder has a commented-out `.baseUrl(...)` for exactly
+this. Swapping in an open model, hosted or on-device, means writing one more
+`BeatRewriter` and nothing else.
 
 Worth deciding early, because it shapes the privacy story: this app reads
 people's private messages. Either say plainly that drafts go to a server, or
@@ -160,13 +160,15 @@ move to an on-device model and say nothing leaves the phone.
   Jackson and OkHttp. `minSdk` is 26 with core library desugaring on, and
   `proguard-rules.pro` has keep rules, which should be enough. If it fights the
   build anyway, delete the dependency and hand-roll the one POST to
-  `/v1/messages` with OkHttp. `ClaudeVariantGenerator` is the only file to
-  rewrite, and moving to a proxy would delete most of it regardless.
-- **No structured outputs.** The model is asked for JSON in the prompt and
-  `DraftParser` reads it tolerantly. The API can enforce the schema instead, via
-  `OutputConfig.builder().format(JsonOutputFormat.builder().schema(...))`. That
-  was left out because the exact Java builder shape could not be verified
-  without a compiler. Worth doing once the project builds.
+  `/v1/messages` with OkHttp. `ClaudeBeatRewriter` is the only file to rewrite,
+  and moving to a proxy or an open model would replace it regardless.
+- **No structured outputs on the Claude path.** The model is asked for JSON in
+  the prompt and `BeatParser` reads it tolerantly. The API can enforce a schema
+  instead, via `OutputConfig.builder().format(JsonOutputFormat.builder()...)`,
+  which was left out because the exact Java builder shape could not be verified
+  without a compiler. The eval's Ollama path already uses schema-constrained
+  decoding, and it was worth roughly sixty points of validity there, so this is
+  the highest-value thing to add once the project builds.
 - **No refusal handling.** An empty response is reported as "the model returned
   no text" rather than inspecting `stop_reason`. Server-side fallbacks are also
   not wired up.

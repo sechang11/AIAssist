@@ -1,54 +1,50 @@
 package com.aitextassistant.generate
 
 /**
- * The instructions that make mix and match safe. The second constraint below is
- * the load-bearing one: alternatives have to be independent of their neighbours,
- * or a mixed draft repeats itself and reads wrong.
+ * One short fragment in, three phrasings out. A port of eval/pipeline.py's
+ * prompt, which is where these words were measured; keep the two in step.
+ *
+ * Deliberately has no worked example. Three earlier rounds showed small models
+ * copy whatever example you give them: a placeholder got echoed literally, and
+ * when it was replaced with realistic text they plagiarised the text instead
+ * and stopped reading the actual message. The response schema carries the
+ * shape, so the prompt does not have to.
  */
 internal object Prompt {
 
-    val SYSTEM = """
-        You turn a message someone has already written into a grid of alternative
-        phrasings, so they can pick a whole version or mix beats from several.
+    fun system(tones: List<String>): String {
+        val numbered = tones.mapIndexed { i, t -> "${i + 1} ${t.lowercase()}" }.joinToString("; ")
+        return """
+            You rewrite one short fragment of a personal message ${tones.size} ways: $numbered.
 
-        Break the message into 2 to 6 slots. A slot is one beat: a greeting, an
-        apology, the core answer, a caveat, a sign-off. List slots in the order
-        they appear in the finished message. Give every slot exactly one
-        alternative per tone, in the order the tones are given.
+            Rewrite the fragment only. The rest of the message is given for context and
+            must not appear in your answer.
 
-        Two constraints make the grid usable:
-        - Reading alternative i from every slot, top to bottom, must produce a
-          natural message in tone i.
-        - Every other combination must work too. The reader will pair alternative 0
-          of one slot with alternative 2 of the next, so no alternative may depend
-          on the wording of a neighbour or repeat something a neighbour says.
+            Keep every name, date, time, number and place from the fragment, exactly as
+            written, in all ${tones.size} rewrites. Add nothing that is not in the fragment.
+            Never change what it commits to: a no stays a no, a maybe stays a maybe, and
+            every condition survives.
 
-        Hold the writer to what they actually wrote:
-        - Keep their meaning, facts, names, times and commitments exactly. Never add
-          information, never invent a reason, never soften a no into a maybe.
-        - Stay close to the original length. This is a message sent from a phone.
-        - Match their register unless a tone asks otherwise. If they wrote in
-          lowercase with no full stops, the casual column stays that way.
-        - Set optional to true only when the message still reads correctly with that
-          slot removed. Greetings, pleasantries and sign-offs usually qualify. The
-          core content does not.
+            Stay within about the length of the fragment. Match the writer's register in
+            the casual rewrites: lowercase with no full stops stays lowercase with no
+            full stops.
 
-        Each alternative is one plain-text fragment: no surrounding quotes, no
-        markdown, no leading or trailing space. Fragments are joined with a single
-        space, so never begin one with punctuation.
+            Give the fragment a two-word label saying what beat it is, and mark it
+            optional only if the whole message still reads correctly without it.
 
-        Reply with the JSON object alone. No preamble, no code fence.
-
-        {"tones":["..."],"slots":[{"id":"s1","label":"short name for this beat","optional":false,"alternatives":["...","..."]}]}
-    """.trimIndent()
+            Reply with a JSON object alone, no preamble and no code fence, holding
+            exactly three keys: "label", a two-word string; "optional", true or false;
+            and "alternatives", an array of exactly ${tones.size} strings in tone order.
+        """.trimIndent()
+    }
 
     /**
      * Built by concatenation on purpose. trimIndent() runs after interpolation,
      * so a multi-line message pasted into a raw string would drag the common
      * indent to zero and leave the surrounding template indented.
      */
-    fun user(original: String, tones: List<String>): String =
-        "Tones, in order: " + tones.joinToString(", ") + "\n\n" +
-            "Message to rework, between the markers:\n" +
-            "<<<MESSAGE\n" + original + "\nMESSAGE"
+    fun user(whole: String, fragment: String, tones: List<String>): String =
+        "Whole message, for context only:\n<<<\n" + whole + "\n>>>\n\n" +
+            "Rewrite just this fragment:\n<<<\n" + fragment + "\n>>>\n\n" +
+            "Tones in order: " + tones.joinToString(", ") + "."
 }

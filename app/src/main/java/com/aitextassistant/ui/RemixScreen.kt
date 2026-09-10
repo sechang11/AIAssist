@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
@@ -93,6 +94,7 @@ fun RemixScreen(
 
             is RemixUiState.Ready -> Ready(
                 remix = state.remix,
+                streaming = state.streaming,
                 original = original,
                 primaryActionLabel = primaryActionLabel,
                 secondaryActionLabel = secondaryActionLabel,
@@ -111,6 +113,7 @@ fun RemixScreen(
 @Composable
 private fun Ready(
     remix: Remix,
+    streaming: Boolean,
     original: String,
     primaryActionLabel: String,
     secondaryActionLabel: String?,
@@ -159,6 +162,24 @@ private fun Ready(
                 onTap = onToggleOpen,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
             )
+        }
+
+        if (streaming) {
+            Row(
+                modifier = Modifier.padding(start = 20.dp, top = 10.dp, end = 20.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(14.dp),
+                    strokeWidth = 2.dp,
+                )
+                Text(
+                    "still writing the rest",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
         }
 
         if (remix.droppedSlots.isNotEmpty()) {
