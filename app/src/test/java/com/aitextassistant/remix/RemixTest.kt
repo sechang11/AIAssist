@@ -300,6 +300,42 @@ class GridBuilderTest {
     }
 
     @Test
+    fun `one failing beat costs that beat, not the whole message`() {
+        var call = 0
+        val flaky = object : BeatRewriter {
+            override suspend fun rewrite(whole: String, fragment: String, tones: List<String>): BeatAnswer {
+                call++
+                if (call == 1) throw IllegalStateException("network")
+                return BeatAnswer("x", false, listOf("one", "two", "three"))
+            }
+        }
+        val slots = runBlocking {
+            GridBuilder(flaky).generate(
+                "the first thing happened. the second thing happened.", TONES,
+            ).toList()
+        }.last().slots
+        assertEquals(2, slots.size)
+        // The failed beat keeps the writer's words rather than disappearing.
+        assertEquals(List(3) { "the first thing happened." }, slots[0].alternatives)
+        assertEquals(listOf("one", "two", "three"), slots[1].alternatives)
+    }
+
+    @Test
+    fun `a total outage throws rather than returning the message unchanged`() {
+        val dead = object : BeatRewriter {
+            override suspend fun rewrite(whole: String, fragment: String, tones: List<String>): BeatAnswer =
+                throw IllegalStateException("no network")
+        }
+        var thrown: Exception? = null
+        try {
+            runBlocking { GridBuilder(dead).generate("friday still works", TONES).toList() }
+        } catch (e: Exception) {
+            thrown = e
+        }
+        assertTrue("silence would look like a successful no-op rewrite", thrown != null)
+    }
+
+    @Test
     fun `the grid is emitted once per beat so the screen can fill in`() {
         val fake = Fake { BeatAnswer("x", false, listOf("a", "b", "c")) }
         val drafts = build(

@@ -31,11 +31,35 @@ class GridBuilder(private val rewriter: BeatRewriter) : VariantGenerator {
         if (beats.isEmpty()) return@flow
 
         val slots = mutableListOf<Slot>()
+        var failures: Exception? = null
+
         beats.forEachIndexed { index, fragment ->
-            slots.add(buildSlot(original, fragment, index, tones))
+            // One beat failing should cost that beat, not the message. But a
+            // total outage must not look like a successful rewrite that
+            // happens to be identical to what the reader already wrote, so the
+            // last error is rethrown below if nothing at all came back.
+            val slot = try {
+                buildSlot(original, fragment, index, tones)
+            } catch (e: Exception) {
+                failures = e
+                unchanged(fragment, index, tones)
+            }
+            slots.add(slot)
             emit(RemixDraft(tones, slots.toList()))
         }
+
+        val error = failures
+        if (error != null && slots.all { it.alternatives.all { text -> text in beats } }) {
+            throw error
+        }
     }
+
+    private fun unchanged(fragment: String, index: Int, tones: List<String>) = Slot(
+        id = "s${index + 1}",
+        label = "part ${index + 1}",
+        optional = false,
+        alternatives = List(tones.size) { fragment },
+    )
 
     private suspend fun buildSlot(
         whole: String,
