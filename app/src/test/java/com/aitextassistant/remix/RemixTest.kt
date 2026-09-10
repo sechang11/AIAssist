@@ -211,6 +211,34 @@ class LostTokenTest {
     }
 
     @Test
+    fun `a rewrite that collapses into a bare label is caught`() {
+        // Observed: the 1.5B answered "have a great time though" with the beat's
+        // own label. No date or name to lose, so the fact check saw nothing.
+        assertTrue(BeatSplitter.collapsed("have a great time though", "concern"))
+        assertTrue(BeatSplitter.collapsed("it was originally sent on the 12th", "12th"))
+    }
+
+    @Test
+    fun `genuine compression is not mistaken for collapse`() {
+        assertTrue(!BeatSplitter.collapsed("the quote came to 480 including delivery", "quote's 480"))
+        assertTrue(!BeatSplitter.collapsed("this week has been mental", "busy week"))
+        // A short fragment has nothing to collapse from.
+        assertTrue(!BeatSplitter.collapsed("sure thing", "Absolutely"))
+    }
+
+    @Test
+    fun `a collapsed rewrite falls back to the writer's words`() {
+        val fake = object : BeatRewriter {
+            override suspend fun rewrite(whole: String, fragment: String, tones: List<String>) =
+                BeatAnswer("x", false, listOf("concern", "warning", "reminder"))
+        }
+        val slot = runBlocking {
+            GridBuilder(fake).generate("have a great time though my friend", TONES).toList()
+        }.last().slots.single()
+        assertEquals(List(3) { "have a great time though my friend" }, slot.alternatives)
+    }
+
+    @Test
     fun `a short number still matches inside a longer one`() {
         // Word boundaries are for letters. "before 11" is kept by "before 11am".
         assertEquals(emptyList<String>(), BeatSplitter.lostTokens("before 11", "before 11am"))
@@ -294,7 +322,7 @@ class GridBuilderTest {
 
     @Test
     fun `the wrong number of alternatives falls back rather than corrupting the grid`() {
-        val fake = Fake { BeatAnswer("x", false, listOf("only one")) }
+        val fake = Fake { BeatAnswer("x", false, listOf("only one alternative")) }
         val slot = build(fake, "see you soon").last().slots.single()
         assertEquals(3, slot.alternatives.size)
     }
@@ -306,7 +334,7 @@ class GridBuilderTest {
             override suspend fun rewrite(whole: String, fragment: String, tones: List<String>): BeatAnswer {
                 call++
                 if (call == 1) throw IllegalStateException("network")
-                return BeatAnswer("x", false, listOf("one", "two", "three"))
+                return BeatAnswer("x", false, listOf("the second one", "that second one", "the second matter"))
             }
         }
         val slots = runBlocking {
@@ -317,7 +345,7 @@ class GridBuilderTest {
         assertEquals(2, slots.size)
         // The failed beat keeps the writer's words rather than disappearing.
         assertEquals(List(3) { "the first thing happened." }, slots[0].alternatives)
-        assertEquals(listOf("one", "two", "three"), slots[1].alternatives)
+        assertEquals(listOf("the second one", "that second one", "the second matter"), slots[1].alternatives)
     }
 
     @Test
@@ -337,7 +365,7 @@ class GridBuilderTest {
 
     @Test
     fun `the grid is emitted once per beat so the screen can fill in`() {
-        val fake = Fake { BeatAnswer("x", false, listOf("a", "b", "c")) }
+        val fake = Fake { BeatAnswer("x", false, listOf("a first way", "a second way", "a third way")) }
         val drafts = build(
             fake,
             "the first thing happened. the second thing happened. the third thing happened.",

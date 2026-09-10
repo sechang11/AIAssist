@@ -71,6 +71,22 @@ object BeatSplitter {
     }
 
     /**
+     * True when a rewrite has lost the content rather than tightened it.
+     *
+     * Small models sometimes answer with the beat's label instead of a rewrite
+     * of it: "have a great time though" came back as "concern", "warning",
+     * "reminder". Nothing in [lostTokens] sees that, because the fragment holds
+     * no date, name or number to lose, so it counted as a clean rewrite.
+     *
+     * Word count only. A character ratio also condemned "the quote came to 480
+     * including delivery" turning into "quote's 480", which is exactly the
+     * concise rewrite this tool exists to produce.
+     */
+    fun collapsed(fragment: String, rewrite: String): Boolean =
+        fragment.split(WHITESPACE).count { it.isNotBlank() } >= 4 &&
+            rewrite.split(WHITESPACE).count { it.isNotBlank() } < 2
+
+    /**
      * Which of the fragment's load-bearing tokens the rewrite dropped: days,
      * times, numbers and names. Ordinary words are meant to change, so they are
      * not checked; protecting every noun would leave nothing to paraphrase.

@@ -31,27 +31,27 @@ class GridBuilder(private val rewriter: BeatRewriter) : VariantGenerator {
         if (beats.isEmpty()) return@flow
 
         val slots = mutableListOf<Slot>()
-        var failures: Exception? = null
+        var failure: Exception? = null
+        var answered = 0
 
         beats.forEachIndexed { index, fragment ->
-            // One beat failing should cost that beat, not the message. But a
-            // total outage must not look like a successful rewrite that
-            // happens to be identical to what the reader already wrote, so the
-            // last error is rethrown below if nothing at all came back.
+            // One beat failing should cost that beat, not the message.
             val slot = try {
-                buildSlot(original, fragment, index, tones)
+                buildSlot(original, fragment, index, tones).also { answered++ }
             } catch (e: Exception) {
-                failures = e
+                failure = e
                 unchanged(fragment, index, tones)
             }
             slots.add(slot)
             emit(RemixDraft(tones, slots.toList()))
         }
 
-        val error = failures
-        if (error != null && slots.all { it.alternatives.all { text -> text in beats } }) {
-            throw error
-        }
+        // But a total outage must not read as a successful rewrite that happens
+        // to be identical to what the reader already wrote. Count the beats that
+        // answered rather than inspecting the text: the guarantee legitimately
+        // reverts a beat to the original, so identical output proves nothing.
+        val error = failure
+        if (error != null && answered == 0) throw error
     }
 
     private fun unchanged(fragment: String, index: Int, tones: List<String>) = Slot(
@@ -71,9 +71,9 @@ class GridBuilder(private val rewriter: BeatRewriter) : VariantGenerator {
 
         // A lossy beat is cheap to retry on its own, which is only affordable
         // because the unit of failure is now a fragment, not the whole message.
-        if (answer != null && answer.alternatives.any { BeatSplitter.lostTokens(fragment, it).isNotEmpty() }) {
+        if (answer != null && damage(fragment, answer) > 0) {
             val second = rewriter.rewrite(whole, fragment, tones)
-            if (second != null && lossCount(fragment, second) < lossCount(fragment, answer)) {
+            if (second != null && damage(fragment, second) < damage(fragment, answer)) {
                 answer = second
             }
         }
@@ -86,12 +86,14 @@ class GridBuilder(private val rewriter: BeatRewriter) : VariantGenerator {
             List(tones.size) { fragment }
         }
 
-        // The guarantee. A rewrite that dropped a date, a name or a number is
-        // not a worse rewrite, it is a different message, so it is never shown.
-        // Losing the retoning on one beat is a far smaller harm than losing the
-        // time the writer agreed to meet, and an unchanged beat is visibly so.
+        // The guarantee. A rewrite that dropped a date, a name or a number, or
+        // collapsed into a bare label, is not a worse rewrite; it is a
+        // different message, so it is never shown. Losing the retoning on one
+        // beat is a far smaller harm than losing the time the writer agreed to
+        // meet, and an unchanged beat is visibly unchanged.
         val safe = alternatives.map { alternative ->
-            if (BeatSplitter.lostTokens(fragment, alternative).isNotEmpty()) fragment else alternative
+            val lost = BeatSplitter.lostTokens(fragment, alternative).isNotEmpty()
+            if (lost || BeatSplitter.collapsed(fragment, alternative)) fragment else alternative
         }
 
         return Slot(
@@ -102,6 +104,10 @@ class GridBuilder(private val rewriter: BeatRewriter) : VariantGenerator {
         )
     }
 
-    private fun lossCount(fragment: String, answer: BeatAnswer): Int =
-        answer.alternatives.sumOf { BeatSplitter.lostTokens(fragment, it).size }
+    /** How much of the writer's meaning this answer would cost, if shown. */
+    private fun damage(fragment: String, answer: BeatAnswer): Int =
+        answer.alternatives.sumOf { alternative ->
+            BeatSplitter.lostTokens(fragment, alternative).size +
+                if (BeatSplitter.collapsed(fragment, alternative)) 1 else 0
+        }
 }

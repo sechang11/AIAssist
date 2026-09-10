@@ -165,6 +165,22 @@ def lost_tokens(fragment: str, rewrite: str):
     return missing
 
 
+def collapsed(fragment: str, rewrite: str) -> bool:
+    """True when a rewrite has lost the content rather than tightened it.
+
+    Small models sometimes answer with the beat's label instead of a rewrite of
+    it: "have a great time though" came back as "concern", "warning",
+    "reminder". Nothing in the fact check sees that, because the fragment holds
+    no date, name or number to lose, so it scored as clean.
+
+    Word count only. A character ratio also condemned "the quote came to 480
+    including delivery" -> "quote's 480", which is exactly the concise rewrite
+    the tool is for.
+    """
+    fragment_words = fragment.split()
+    return len(fragment_words) >= 4 and len(rewrite.split()) < 2
+
+
 def build_grid(whole: str, ask, tones=None, retry=True):
     """`ask(fragment) -> dict` does one model call. Returns an app-shaped grid.
 
@@ -180,26 +196,28 @@ def build_grid(whole: str, ask, tones=None, retry=True):
         answer = ask(whole, fragment)
         alternatives = (answer or {}).get("alternatives") or []
 
-        if retry and alternatives and any(lost_tokens(fragment, a) for a in alternatives):
+        def damage(alts):
+            return sum(len(lost_tokens(fragment, a)) + collapsed(fragment, a) for a in alts)
+
+        if retry and alternatives and damage(alternatives):
             retried += 1
             second = ask(whole, fragment)
             if second and second.get("alternatives"):
-                before = sum(len(lost_tokens(fragment, a)) for a in alternatives)
-                after = sum(len(lost_tokens(fragment, a)) for a in second["alternatives"])
-                if after < before:
+                if damage(second["alternatives"]) < damage(alternatives):
                     answer, alternatives = second, second["alternatives"]
 
         if len(alternatives) != len(tones):
             # Better a beat the reader cannot retone than a beat that vanishes.
             alternatives = [fragment] * len(tones)
 
-        # The guarantee. A rewrite that dropped a date or a name is not a worse
-        # rewrite, it is a different message, so it does not get shown. Losing
-        # the retoning on one beat is a far smaller harm than losing the time
-        # the writer agreed to meet, and the reader can see it is unchanged.
+        # The guarantee. A rewrite that dropped a date or a name, or collapsed
+        # into a bare label, is not a worse rewrite; it is a different message,
+        # so it does not get shown. Losing the retoning on one beat is a far
+        # smaller harm than losing the time the writer agreed to meet, and an
+        # unchanged beat is visibly unchanged.
         kept = []
         for alternative in alternatives:
-            if lost_tokens(fragment, alternative):
+            if lost_tokens(fragment, alternative) or collapsed(fragment, alternative):
                 kept.append(fragment)
                 reverted += 1
             else:
