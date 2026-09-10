@@ -8,28 +8,50 @@ Two ways in: the selection toolbar of every app, via `ACTION_PROCESS_TEXT`,
 and a floating chat head. No accessibility service and no default-SMS role,
 so nothing Play review objects to.
 
-## The finding that shapes everything
+## What measurement actually showed
 
-A model small enough to sit on a phone does this as well as one twenty-eight
-times larger, once the task is the right shape and the bookkeeping lives in
-code rather than in the prompt. Measured on fifty deliberately awkward
-messages, scored mechanically:
+Two things, and the second one reverses the first.
 
-| model | size | clean | median |
+**Restructuring the task beat every other change.** The original design asked
+one call to segment a message, paraphrase every beat, keep each cell
+independent and preserve every fact. That is a bookkeeping problem, and it is
+what small models cannot hold: their output stayed fluent and well-formed while
+the content went wrong. Moving the bookkeeping into code took a 1.5B from 10%
+to 58% on the mechanical score, a fivefold improvement with no change of model.
+
+**Then the mechanical score turned out to be measuring the wrong thing.** It
+sees structure and hard facts. It cannot see meaning. So it scored as perfect a
+rewrite that turned "sorry i cant make saturday, ive got my sisters wedding"
+into "i hope you have a fantastic time at your sister's wedding", handing the
+writer's own excuse to the reader.
+
+Adding a semantic judge, which reads each rewrite against the original and asks
+only whether the commitment, the facts and the roles survive, gives a different
+and strictly size-ordered answer:
+
+| model | size | mechanical | faithful |
 |---|---|---|---|
-| Qwen 0.5B | 397 MB | 30% | 0.3s |
-| Qwen 1.5B | 986 MB | **74%** | 0.3s |
-| Qwen 7B | 4.7 GB | 68% | 0.5s |
-| Qwen 14B | 9.0 GB | **74%** | 16.5s |
+| Qwen 0.5B | 397 MB | 14% | 63% |
+| Qwen 0.5B fine-tuned | 397 MB | **66%** | **59%** |
+| Qwen 1.5B | 986 MB | 58% | 70% |
+| Qwen 1.5B fine-tuned | 986 MB | 60% | 66% |
+| Qwen 7B | 4.7 GB | 72% | 75% |
+| Qwen 14B | 9.0 GB | 72% | **81%** |
 
-Two things follow. There is a ceiling near 74% that parameters do not move, so
-the remaining failures are not a capability problem. And a sub-gigabyte model
-reaches it, which is what makes running entirely on the phone a real option
-rather than a compromise.
+Fine-tuning raised the mechanical score and lowered faithfulness, at both
+sizes. It taught the form of a good answer at the cost of the substance, which
+is Goodhart's law arriving on schedule: the metric rewarded exactly what
+training optimised and was blind to what that cost.
 
-Nine of the 14B's thirteen remaining failures are the fact guarantee reverting
-a beat to the writer's own words, which is the design working rather than
-breaking. See `eval/` for how that is measured and why.
+So the earlier conclusion here, that a ceiling near 74% exists and model size
+does not move it, was an artefact of the instrument. Size does buy fidelity,
+monotonically. Worth one caveat: the judge is a 14B scoring output that
+includes its own, so its top position may be self-preference. The trend across
+the three models it did not produce is consistent regardless.
+
+The practical read is that nothing here is ready for messages that take a
+position, and the honest next step is a better judge rather than a better
+score. `eval/` has the harness and the reasoning.
 
 ## Running it
 

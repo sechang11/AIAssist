@@ -181,6 +181,26 @@ def collapsed(fragment: str, rewrite: str) -> bool:
     return len(fragment_words) >= 4 and len(rewrite.split()) < 2
 
 
+def overran(fragment: str, rewrite: str) -> bool:
+    """True when a rewrite has grown far past the beat it was given.
+
+    Three separate failures all look like this, and none of the other checks
+    see any of them:
+
+      - The model rewrites the whole message instead of the fragment, so the
+        beat absorbs its neighbours and mixing produces repetition.
+      - It echoes the instructions back: "the quote came to 480 including
+        delivery Give the fragment a two-word label saying what".
+      - It invents a reason or a commitment to pad with, which is how "ive got
+        my sisters wedding" became "i hope you have a fantastic time at your
+        sister's wedding".
+
+    The additive floor keeps short beats out of it, where a formal rewrite
+    legitimately doubles the length: "sure thing" is allowed fifty characters.
+    """
+    return len(rewrite) > max(2.2 * len(fragment), len(fragment) + 40)
+
+
 def build_grid(whole: str, ask, tones=None, retry=True):
     """`ask(fragment) -> dict` does one model call. Returns an app-shaped grid.
 
@@ -197,7 +217,8 @@ def build_grid(whole: str, ask, tones=None, retry=True):
         alternatives = (answer or {}).get("alternatives") or []
 
         def damage(alts):
-            return sum(len(lost_tokens(fragment, a)) + collapsed(fragment, a) for a in alts)
+            return sum(len(lost_tokens(fragment, a)) + collapsed(fragment, a)
+                       + overran(fragment, a) for a in alts)
 
         if retry and alternatives and damage(alternatives):
             retried += 1
@@ -210,14 +231,17 @@ def build_grid(whole: str, ask, tones=None, retry=True):
             # Better a beat the reader cannot retone than a beat that vanishes.
             alternatives = [fragment] * len(tones)
 
-        # The guarantee. A rewrite that dropped a date or a name, or collapsed
-        # into a bare label, is not a worse rewrite; it is a different message,
-        # so it does not get shown. Losing the retoning on one beat is a far
-        # smaller harm than losing the time the writer agreed to meet, and an
-        # unchanged beat is visibly unchanged.
+        # The guarantee. A rewrite that dropped a date or a name, collapsed
+        # into a bare label, or ran away past the beat it was given, is not a
+        # worse rewrite; it is a different message, so it does not get shown.
+        # Losing the retoning on one beat is a far smaller harm than losing the
+        # time the writer agreed to meet, and an unchanged beat is visibly so.
         kept = []
         for alternative in alternatives:
-            if lost_tokens(fragment, alternative) or collapsed(fragment, alternative):
+            unsafe = (lost_tokens(fragment, alternative)
+                      or collapsed(fragment, alternative)
+                      or overran(fragment, alternative))
+            if unsafe:
                 kept.append(fragment)
                 reverted += 1
             else:

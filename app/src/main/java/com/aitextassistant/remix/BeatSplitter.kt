@@ -87,6 +87,23 @@ object BeatSplitter {
             rewrite.split(WHITESPACE).count { it.isNotBlank() } < 2
 
     /**
+     * True when a rewrite has grown far past the beat it was given.
+     *
+     * Three separate failures all look like this, and nothing else catches any
+     * of them: the model rewriting the whole message instead of the fragment,
+     * so the beat swallows its neighbours and mixing repeats itself; the model
+     * echoing its own instructions back into the answer; and the model
+     * inventing a reason to pad with, which is how "ive got my sisters
+     * wedding" became "i hope you have a fantastic time at your sister's
+     * wedding", handing the writer's excuse to the reader.
+     *
+     * The additive floor keeps short beats out of it, where a formal rewrite
+     * legitimately doubles the length.
+     */
+    fun overran(fragment: String, rewrite: String): Boolean =
+        rewrite.length > maxOf(2.2 * fragment.length, (fragment.length + 40).toDouble())
+
+    /**
      * Which of the fragment's load-bearing tokens the rewrite dropped: days,
      * times, numbers and names. Ordinary words are meant to change, so they are
      * not checked; protecting every noun would leave nothing to paraphrase.

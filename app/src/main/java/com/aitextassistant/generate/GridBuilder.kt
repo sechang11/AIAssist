@@ -86,14 +86,17 @@ class GridBuilder(private val rewriter: BeatRewriter) : VariantGenerator {
             List(tones.size) { fragment }
         }
 
-        // The guarantee. A rewrite that dropped a date, a name or a number, or
-        // collapsed into a bare label, is not a worse rewrite; it is a
-        // different message, so it is never shown. Losing the retoning on one
-        // beat is a far smaller harm than losing the time the writer agreed to
-        // meet, and an unchanged beat is visibly unchanged.
+        // The guarantee. A rewrite that dropped a date, a name or a number,
+        // collapsed into a bare label, or ran away past the beat it was given,
+        // is not a worse rewrite; it is a different message, so it is never
+        // shown. Losing the retoning on one beat is a far smaller harm than
+        // losing the time the writer agreed to meet, and an unchanged beat is
+        // visibly unchanged.
         val safe = alternatives.map { alternative ->
-            val lost = BeatSplitter.lostTokens(fragment, alternative).isNotEmpty()
-            if (lost || BeatSplitter.collapsed(fragment, alternative)) fragment else alternative
+            val unsafe = BeatSplitter.lostTokens(fragment, alternative).isNotEmpty() ||
+                BeatSplitter.collapsed(fragment, alternative) ||
+                BeatSplitter.overran(fragment, alternative)
+            if (unsafe) fragment else alternative
         }
 
         return Slot(
@@ -108,6 +111,7 @@ class GridBuilder(private val rewriter: BeatRewriter) : VariantGenerator {
     private fun damage(fragment: String, answer: BeatAnswer): Int =
         answer.alternatives.sumOf { alternative ->
             BeatSplitter.lostTokens(fragment, alternative).size +
-                if (BeatSplitter.collapsed(fragment, alternative)) 1 else 0
+                (if (BeatSplitter.collapsed(fragment, alternative)) 1 else 0) +
+                (if (BeatSplitter.overran(fragment, alternative)) 1 else 0)
         }
 }

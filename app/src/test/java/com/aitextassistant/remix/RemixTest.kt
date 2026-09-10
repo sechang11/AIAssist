@@ -239,6 +239,49 @@ class LostTokenTest {
     }
 
     @Test
+    fun `a rewrite that runs away past its beat is caught`() {
+        // Observed: the model rewrote the whole message instead of the beat,
+        // and once echoed its own instructions back into the answer.
+        assertTrue(
+            BeatSplitter.overran(
+                "hey so sorry i didnt get back to you sooner",
+                "Hey, sorry I didn't get back to you sooner. Friday still works for me if " +
+                    "that's alright, and I'm really looking forward to it.",
+            ),
+        )
+        assertTrue(
+            BeatSplitter.overran(
+                "ive got my sisters wedding.",
+                "i hope you have a fantastic time at your sister's wedding! i'll be thinking of you",
+            ),
+        )
+    }
+
+    @Test
+    fun `a formal expansion of a short beat is allowed`() {
+        // Short beats legitimately double in the formal column, which is why
+        // the ceiling has an additive floor rather than being purely a ratio.
+        assertTrue(!BeatSplitter.overran("sure thing", "i confirm that my end is clear."))
+        assertTrue(!BeatSplitter.overran("ok cool see you then", "Understood, I shall see you then."))
+        assertTrue(!BeatSplitter.overran("this week has been mental", "It has been an unusually busy week"))
+    }
+
+    @Test
+    fun `a runaway rewrite falls back to the writer's words`() {
+        val fake = object : BeatRewriter {
+            override suspend fun rewrite(whole: String, fragment: String, tones: List<String>) =
+                BeatAnswer("x", false, List(3) {
+                    "I am delighted to inform you at considerable length that this beat " +
+                        "has been expanded well beyond anything the writer actually wrote."
+                })
+        }
+        val slot = runBlocking {
+            GridBuilder(fake).generate("friday still works for me", TONES).toList()
+        }.last().slots.single()
+        assertEquals(List(3) { "friday still works for me" }, slot.alternatives)
+    }
+
+    @Test
     fun `a short number still matches inside a longer one`() {
         // Word boundaries are for letters. "before 11" is kept by "before 11am".
         assertEquals(emptyList<String>(), BeatSplitter.lostTokens("before 11", "before 11am"))
