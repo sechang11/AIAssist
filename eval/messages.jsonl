@@ -18,3 +18,33 @@
 {"id": "conditional", "stance": "yes-if", "facts": ["4"], "probes": "the condition is the whole message; dropping it turns a conditional yes into a promise", "text": "yes if we can finish by 4, otherwise ill have to skip it"}
 {"id": "cheerful", "stance": "yes", "facts": ["drinks"], "probes": "emoji and exclamation; does the formal column handle it without sounding absurd", "text": "sorted!! ill bring the drinks"}
 {"id": "deferring", "stance": "maybe", "facts": ["Sam", "tomorrow"], "probes": "a deferral, not an answer; no column may answer", "text": "let me check with Sam and come back to you tomorrow"}
+{"id": "late-traffic", "stance": "none", "facts": ["15", "a406"], "probes": "a duration and a road name, both easy to drop", "text": "running about 15 mins late sorry, traffic on the a406"}
+{"id": "errand", "stance": "none", "facts": ["milk", "bread"], "probes": "two ordinary nouns that are the entire point of the message", "text": "can you grab milk and bread on the way back please"}
+{"id": "half-seven", "stance": "yes", "facts": ["7"], "probes": "a spoken time form; does it survive being made formal", "text": "ill be there at half 7"}
+{"id": "reassurance", "stance": "none", "facts": [], "probes": "no facts at all; pure tone, and the concise column must not vanish", "text": "no worries at all honestly, these things happen"}
+{"id": "where-we-are", "stance": "none", "facts": ["pub", "green"], "probes": "a disambiguating detail the reader needs to find the place", "text": "were at the pub on the corner, the one with the green door"}
+{"id": "already-formal", "stance": "none", "facts": ["Okafor", "14", "March", "10"], "probes": "already formal; the formal column should barely move", "text": "Dear Mr Okafor, I am writing to confirm our appointment on 14 March at 10am."}
+{"id": "no-then-yes", "stance": "no", "facts": [], "probes": "a no to this week and an opening for next; both halves must survive", "text": "cant do this week im afraid, next week any good?"}
+{"id": "hearsay", "stance": "maybe", "facts": [], "probes": "reports someone else's no plus own hope; must not merge into one stance", "text": "she said no but i think she might come round"}
+{"id": "split-bill", "stance": "none", "facts": ["25", "75", "tip"], "probes": "two figures that must not be swapped or recomputed", "text": "25 each including the tip, so 75 total"}
+{"id": "gentle-chase", "stance": "none", "facts": [], "probes": "a chase softened by no rush; the formal column must not harden it", "text": "did you manage to send that thing over? no rush"}
+{"id": "condolence", "stance": "none", "facts": [], "probes": "bereavement; no tone may become brisk or cheerful", "text": "im so sorry for your loss, thinking of you"}
+{"id": "survey", "stance": "none", "facts": ["damp", "bathroom", "boiler", "18"], "probes": "four facts, one of them a number attached to a noun", "text": "the flat has damp in the bathroom and the boiler is 18 years old"}
+{"id": "enthusiastic", "stance": "yes", "facts": [], "probes": "double exclamation; the formal column must not sound absurd", "text": "yes please!! that would be amazing"}
+{"id": "waiting-on", "stance": "maybe", "facts": ["Priya"], "probes": "a deferral naming a third party; no column may answer", "text": "ill let you know once ive spoken to Priya"}
+{"id": "swap-days", "stance": "maybe", "facts": ["wednesday", "tuesday"], "probes": "two weekdays that must not be transposed", "text": "can we do wednesday instead of tuesday, ive got a thing"}
+{"id": "mild-complaint", "stance": "none", "facts": [], "probes": "a complaint; no tone may turn it into an apology from the writer", "text": "youre going to have to give me a bit more notice next time"}
+{"id": "flight", "stance": "yes", "facts": ["21:40", "friday"], "probes": "24-hour time plus a weekday", "text": "booked! flight lands at 21:40 on the friday"}
+{"id": "polite-no", "stance": "no", "facts": [], "probes": "a soft no that must not read as a maybe in any column", "text": "not really my thing to be honest but thanks for asking"}
+{"id": "rain-check", "stance": "no", "facts": [], "probes": "declining tonight while leaving the door open", "text": "im in bed already sorry, rain check?"}
+{"id": "door-code", "stance": "none", "facts": ["4471", "thursday"], "probes": "a code where a single wrong digit makes the message useless", "text": "the code is 4471 and the bins go out on a thursday"}
+{"id": "good-luck", "stance": "none", "facts": ["interview"], "probes": "warmth plus a question; the concise column must keep both", "text": "hope the interview went well!! let me know how it was"}
+{"id": "resend", "stance": "none", "facts": ["invoice", "12th"], "probes": "an ordinal date inside a mild reproach", "text": "ive attached the invoice again, it was originally sent on the 12th"}
+{"id": "serious", "stance": "none", "facts": ["yesterday"], "probes": "a difficult conversation; no column may soften it into nothing", "text": "we need to talk about what happened yesterday"}
+{"id": "two-words", "stance": "yes", "facts": [], "probes": "two words; the shortest thing anyone would actually remix", "text": "sure thing"}
+{"id": "swamped", "stance": "no", "facts": ["20th"], "probes": "a no with a date attached to when it might change", "text": "sorry cant help this time, im completely swamped until the 20th"}
+{"id": "eta", "stance": "none", "facts": ["40", "M25"], "probes": "an estimate and a motorway, both load-bearing", "text": "leaving now, should be about 40 mins depending on the M25"}
+{"id": "good-news", "stance": "yes", "facts": [], "probes": "good news; the formal column must not drain it", "text": "great news, they accepted the offer!"}
+{"id": "confidence", "stance": "no", "facts": [], "probes": "asking for discretion; the request must survive every tone", "text": "id rather we didnt tell anyone yet if thats ok"}
+{"id": "room-change", "stance": "none", "facts": ["3pm", "B", "A"], "probes": "a time and two single-letter rooms that must not be swapped", "text": "the meeting moved to 3pm and its in room B not room A now"}
+{"id": "paid", "stance": "none", "facts": [], "probes": "answering a chase; must stay an answer rather than an apology", "text": "thanks for chasing, ive paid it just now"}

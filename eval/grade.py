@@ -24,6 +24,17 @@ NUMBERS = re.compile(r"\d+(?::\d+)?")
 WORDS = re.compile(r"[a-z0-9']+")
 
 
+def is_hard(fact):
+    """The same rule the app's guarantee uses. A hard fact is one the pipeline
+    promises to keep, so anything below 100% here is a bug rather than a
+    quality wobble. Soft facts are ordinary nouns nothing protects."""
+    return (
+        any(c.isdigit() for c in fact)
+        or fact.lower() in WEEKDAYS
+        or (fact[:1].isupper() and len(fact) > 2)
+    )
+
+
 def load_messages():
     with open(HERE / "messages.jsonl", encoding="utf-8") as f:
         return {json.loads(line)["id"]: json.loads(line) for line in f if line.strip()}
@@ -91,14 +102,20 @@ def grade_one(record, message):
     columns = [assemble(grid, c) for c in range(len(grid["tones"]))]
     out["columns"] = columns
 
-    # 1. Do the writer's facts survive into every column?
-    missing = []
+    # 1. Do the writer's facts survive into every column? Hard facts are the
+    # ones the guarantee covers, so they are a correctness check; soft facts are
+    # ordinary nouns, which is a quality signal rather than a promise broken.
+    hard_missing, soft_missing = [], []
     for column, text in zip(grid["tones"], columns):
         for fact in message["facts"]:
-            if fact.lower() not in text.lower():
-                missing.append(f"{column} lost '{fact}'")
-    out["facts_kept"] = not missing
-    out["problems"] += missing
+            if fact.lower() in text.lower():
+                continue
+            (hard_missing if is_hard(fact) else soft_missing).append(
+                f"{column} lost '{fact}'")
+    out["hard_kept"] = not hard_missing
+    out["soft_kept"] = not soft_missing
+    out["facts_kept"] = not (hard_missing or soft_missing)
+    out["problems"] += hard_missing + soft_missing
 
     # 2. Did it invent a day, a time or a number the writer never wrote?
     invented = []
@@ -160,7 +177,8 @@ def score(path, messages):
         "graded": graded,
         "n": len(graded),
         "valid": pct("valid"),
-        "facts_kept": pct("facts_kept"),
+        "hard_kept": pct("hard_kept"),
+        "soft_kept": pct("soft_kept"),
         "nothing_invented": pct("nothing_invented"),
         "alts_distinct": pct("alts_distinct"),
         "slots_independent": pct("slots_independent"),
@@ -182,16 +200,18 @@ def main():
 
     results = [score(p, messages) for p in paths]
 
-    header = f"{'model':<34}{'valid':>7}{'facts':>7}{'no-add':>8}{'distinct':>10}{'indep':>7}{'CLEAN':>8}{'med s':>7}{'max s':>7}"
+    header = (f"{'model':<36}{'valid':>7}{'hard':>7}{'soft':>7}{'no-add':>8}"
+              f"{'distinct':>10}{'indep':>7}{'CLEAN':>8}{'med s':>7}{'max s':>7}")
     print("\n" + header)
     print("-" * len(header))
     for r in results:
-        print(f"{r['model'][:33]:<34}{r['valid']:>6.0f}%{r['facts_kept']:>6.0f}%"
-              f"{r['nothing_invented']:>7.0f}%{r['alts_distinct']:>9.0f}%"
-              f"{r['slots_independent']:>6.0f}%{r['clean']:>7.0f}%"
-              f"{r['median_s']:>7.1f}{r['slowest_s']:>7.1f}")
+        print(f"{r['model'][:35]:<36}{r['valid']:>6.0f}%{r['hard_kept']:>6.0f}%"
+              f"{r['soft_kept']:>6.0f}%{r['nothing_invented']:>7.0f}%"
+              f"{r['alts_distinct']:>9.0f}%{r['slots_independent']:>6.0f}%"
+              f"{r['clean']:>7.0f}%{r['median_s']:>7.1f}{r['slowest_s']:>7.1f}")
     print("\nCLEAN is the headline: no problem of any kind on that message.")
-    print("valid = right shape | facts = the writer's facts survived every column")
+    print("valid = right shape | hard = days, times, numbers and names survived")
+    print("soft = ordinary nouns survived, a quality signal the guarantee does not cover")
     print("no-add = invented no day, time or number | indep = neighbouring beats do not repeat\n")
 
     for r in results:
