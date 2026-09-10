@@ -36,7 +36,7 @@ class ProcessTextActivity : ComponentActivity() {
         setContent {
             RemixTheme {
                 val vm: RemixViewModel = viewModel(
-                    factory = RemixViewModel.factory(Generators.default()),
+                    factory = RemixViewModel.factory(Generators.default(this)),
                 )
                 LaunchedEffect(selected) { vm.load(selected) }
 

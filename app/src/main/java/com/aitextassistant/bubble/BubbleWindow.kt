@@ -44,12 +44,16 @@ class BubbleWindow(
     private val head = ChatHead(
         context = context,
         owner = owner,
-        onTap = { expand() },
+        // Posted, not called. The tap arrives inside the collapsed window's own
+        // touch dispatch, and tearing that window down mid-dispatch leaves the
+        // WindowManager in a state where adding the panel quietly fails. The
+        // symptom is a bubble that does nothing at all when tapped.
+        onTap = { handler.post { expand() } },
         onDismissed = { onStopRequested() },
     )
 
     private val viewModel: RemixViewModel =
-        ViewModelProvider(owner, RemixViewModel.factory(Generators.default()))
+        ViewModelProvider(owner, RemixViewModel.factory(Generators.default(context)))
             .get(RemixViewModel::class.java)
 
     private var panel: View? = null
@@ -81,7 +85,13 @@ class BubbleWindow(
                 }
             }
             onBack = { collapseLater() }
-            onTouchAbove = { collapseLater() }
+            // The tap that opened the panel can still be in flight when it
+            // appears, and would close it again immediately. Ignore outside
+            // touches until the finger that opened it has certainly lifted.
+            val openedAt = System.currentTimeMillis()
+            onTouchAbove = {
+                if (System.currentTimeMillis() - openedAt > 300) collapseLater()
+            }
         }
 
         val compose = ComposeView(context).apply {

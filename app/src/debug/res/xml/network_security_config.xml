@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Debug builds only. Android blocks plain HTTP by default, and an Ollama server
+  on your own network speaks plain HTTP. Release builds never see this file, so
+  the shipping app keeps the default and refuses cleartext.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true" />
+</network-security-config>

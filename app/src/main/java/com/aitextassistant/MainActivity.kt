@@ -36,6 +36,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -68,7 +69,7 @@ class MainActivity : ComponentActivity() {
             RemixTheme {
                 Surface(Modifier.fillMaxSize()) {
                     val vm: RemixViewModel = viewModel(
-                        factory = RemixViewModel.factory(Generators.default()),
+                        factory = RemixViewModel.factory(Generators.default(this)),
                     )
                     if (vm.state is RemixUiState.Idle) {
                         Home(
@@ -142,6 +143,11 @@ private fun Home(
     onRemix: (String) -> Unit,
 ) {
     var draft by remember { mutableStateOf("") }
+    val context = LocalContext.current
+    val settings = remember { com.aitextassistant.generate.Settings(context) }
+    var host by remember { mutableStateOf(settings.ollamaHost) }
+    var model by remember { mutableStateOf(settings.ollamaModel) }
+    var saved by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -151,6 +157,52 @@ private fun Home(
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         Text("Remix", style = MaterialTheme.typography.headlineMedium)
+
+        Card {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Text("Where the rewrites come from", style = MaterialTheme.typography.titleSmall)
+                Text(
+                    "Now using " + Generators.describe(context) + ".",
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+                Text(
+                    "Point this at a machine on your wifi running ollama serve and you " +
+                        "get real rewrites with no key and no cost. Leave it blank and " +
+                        "the app falls back to a stand-in that barely changes anything.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+
+                OutlinedTextField(
+                    value = host,
+                    onValueChange = { host = it; saved = false },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    label = { Text("Server") },
+                    placeholder = { Text("http://192.168.0.45:11434") },
+                )
+                OutlinedTextField(
+                    value = model,
+                    onValueChange = { model = it; saved = false },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    label = { Text("Model") },
+                )
+                Button(
+                    onClick = {
+                        settings.ollamaHost = host
+                        settings.ollamaModel = model
+                        saved = true
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = 52.dp),
+                ) { Text(if (saved) "Saved. Reopen the app to apply." else "Save") }
+            }
+        }
 
         Card {
             Column(
@@ -212,23 +264,6 @@ private fun Home(
                         "find it. This one replaces the text in place, no pasting.",
                     style = MaterialTheme.typography.bodyMedium,
                 )
-            }
-        }
-
-        if (!Generators.hasApiKey) {
-            Card {
-                Column(
-                    modifier = Modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(6.dp),
-                ) {
-                    Text("No API key", style = MaterialTheme.typography.titleSmall)
-                    Text(
-                        "Running the offline stub, which does mechanical string edits " +
-                            "rather than real rewrites. Put ANTHROPIC_API_KEY in " +
-                            "local.properties and rebuild to use the model.",
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
-                }
             }
         }
 
