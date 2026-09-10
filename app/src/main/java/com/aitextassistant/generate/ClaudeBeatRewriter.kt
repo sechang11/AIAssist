@@ -41,7 +41,9 @@ class ClaudeBeatRewriter(private val apiKey: String) : BeatRewriter {
             // of someone waiting to hit send. Effort is the latency knob; leave
             // adaptive thinking alone, which on Opus 5 is on by default.
             .outputConfig(OutputConfig.builder().effort(OutputConfig.Effort.LOW).build())
-            .system(Prompt.system(tones))
+            // The Anthropic path cannot constrain decoding on Android, so it has
+            // to ask for the shape in words. See Prompt for why that is separable.
+            .system(Prompt.system(tones, shapeHint = true))
             .addUserMessage(Prompt.user(whole, fragment, tones))
             .build()
 
