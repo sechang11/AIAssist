@@ -26,16 +26,18 @@ class StubBeatRewriter : BeatRewriter {
     }
 
     private fun concise(s: String): String =
-        s.replace(FILLER, "").replace(Regex("\s+"), " ").trim().ifEmpty { s }
+        s.replace(FILLER, "").replace(Regex("\\s+"), " ").trim().ifEmpty { s }
 
     private fun formal(s: String): String =
         CONTRACTIONS.entries
-            .fold(s) { acc, (short, long) -> acc.replace(Regex("\b$short\b", RegexOption.IGNORE_CASE), long) }
+            .fold(s) { acc, (short, long) ->
+                acc.replace(Regex("\\b" + Regex.escape(short) + "\\b", RegexOption.IGNORE_CASE), long)
+            }
             .replaceFirstChar { it.uppercase() }
 
     private companion object {
         val FILLER = Regex(
-            "\b(just|really|actually|basically|kind of|sort of|I think|I guess)\b\s*",
+            "\\b(just|really|actually|basically|kind of|sort of|I think|I guess)\\b\\s*",
             RegexOption.IGNORE_CASE,
         )
         val CONTRACTIONS = mapOf(

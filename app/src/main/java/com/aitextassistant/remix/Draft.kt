@@ -140,7 +140,7 @@ data class Remix(
  */
 internal fun String.tidy(): String =
     trim()
-        .replace(Regex("\s+"), " ")
-        .replace(Regex("\s+([,.!?;:])"), "$1")
-        .replace(Regex("^[,.;:!?]+\s*"), "")
+        .replace(Regex("\\s+"), " ")
+        .replace(Regex("\\s+([,.!?;:])"), "$1")
+        .replace(Regex("^[,.;:!?]+\\s*"), "")
         .trim()
