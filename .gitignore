@@ -13,3 +13,4 @@ design/remix-app-screens.html
 eval/out/
 __pycache__/
 *.pyc
+dist/

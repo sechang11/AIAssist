@@ -151,32 +151,40 @@ Worth deciding early, because it shapes the privacy story: this app reads
 people's private messages. Either say plainly that drafts go to a server, or
 move to an on-device model and say nothing leaves the phone.
 
+## What has actually been run
+
+Debug and release both build, and 33 unit tests pass. That happened on a Fedora
+box with a hand-built toolchain, not in Android Studio, so treat the IDE as
+unverified rather than the code.
+
+**Never run on a phone.** Everything below the compiler is untested: whether the
+chat head drags properly, whether an overlay window can really read the
+clipboard once focused, how the streaming beats feel, whether the tap-to-offset
+mapping on the message picks the right beat. All of that needs a device.
+
 ## Known gaps
 
-- **Nothing here is compiled.** It was written on a machine with no JDK, no
-  Android SDK and no Gradle, so the first build will surface real errors. The
-  pure-Kotlin core is covered by tests; the Android and SDK wiring is not.
-- **`anthropic-java` is unproven on Android.** It is a JVM SDK that pulls in
-  Jackson and OkHttp. `minSdk` is 26 with core library desugaring on, and
-  `proguard-rules.pro` has keep rules, which should be enough. If it fights the
-  build anyway, delete the dependency and hand-roll the one POST to
-  `/v1/messages` with OkHttp. `ClaudeBeatRewriter` is the only file to rewrite,
-  and moving to a proxy or an open model would replace it regardless.
-- **No structured outputs on the Claude path.** The model is asked for JSON in
-  the prompt and `BeatParser` reads it tolerantly. The API can enforce a schema
-  instead, via `OutputConfig.builder().format(JsonOutputFormat.builder()...)`,
-  which was left out because the exact Java builder shape could not be verified
-  without a compiler. The eval's Ollama path already uses schema-constrained
-  decoding, and it was worth roughly sixty points of validity there, so this is
-  the highest-value thing to add once the project builds.
+- **The Claude path cannot use the SDK's schema-derived structured outputs.**
+  `anthropic-java` bundles victools' schema generator, which reflects over
+  `java.lang.reflect.AnnotatedType`. Android has no such class at any API level.
+  R8 fails the release build without the `-dontwarn` rules now in
+  `proguard-rules.pro`, and suppressing them is only safe because nothing calls
+  that path. The class-based `outputConfig(SomeClass.class)` overload would
+  throw on a real phone. Send a schema as JSON or keep parsing text.
+
+  This matters, because schema-constrained decoding was worth about sixty points
+  of validity on the Ollama side of the eval. The Claude path does not get it
+  for free.
 - **No refusal handling.** An empty response is reported as "the model returned
   no text" rather than inspecting `stop_reason`. Server-side fallbacks are also
   not wired up.
-- **The preview is not editable.** People will want one last manual tweak before
-  sending.
-- **Latency is untested.** `effort` is set to `LOW` for this reason, and it is
-  the first knob to turn. If a round trip feels slow next to a keyboard, that is
-  the argument for an on-device model.
+- **The assembled message is not editable.** People will want one last manual
+  tweak before sending.
+- **Real latency is unmeasured.** On a 5090 a beat comes back in roughly half a
+  second, but that says nothing about a phone or a round trip to an API.
+- **The debug APK is 17MB**, most of it the Anthropic SDK, Jackson and Compose.
+  An on-device model would replace the first two and add a much larger download
+  of its own.
 
 ## Where this goes next
 
