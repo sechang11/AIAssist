@@ -3,10 +3,19 @@
     python grade.py                       # everything in out/
     python grade.py qwen2.5-7b-instruct.jsonl claude-opus-5.jsonl
 
-Most of this is mechanical on purpose. The failure that actually hurts a user is
-the model quietly changing what they committed to, and that is checkable without
-a judge: the facts either survive into every column or they do not. Tone and
-naturalness are not checkable that way, so those go in a section for you to read.
+All of this is mechanical, which makes it fast, free and deterministic, and
+means it cannot see meaning.
+
+That limit is bigger than it sounds. This scored perfectly clean:
+
+    was: sorry i cant make saturday, ive got my sisters wedding
+    got: i hope you have a fantastic time at your sister's wedding!
+
+The wedding is why the writer cannot come; the rewrite hands it to the reader.
+Every hard token survived, so nothing here complained. An earlier version of
+this docstring claimed the failure that hurts a user is checkable without a
+judge. It is not. Run judge.py alongside, and read the position-taking messages
+this prints at the end yourself.
 """
 
 import json
