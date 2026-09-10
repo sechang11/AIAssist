@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Remix — where the model runs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap">
+<style>
+  :root {
+    --bg: oklch(23% 0.008 70);
+    --panel: oklch(27% 0.008 70);
+    --panel2: oklch(30.5% 0.008 70);
+    --line: oklch(36% 0.008 70);
+    --text: oklch(93% 0.006 80);
+    --dim: oklch(72% 0.008 75);
+    --dimmer: oklch(60% 0.008 75);
+    --accent: oklch(74% 0.14 265);
+    --good: oklch(76% 0.15 150);
+    --warn: oklch(80% 0.14 75);
+    --bad: oklch(72% 0.16 25);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font-family: 'Manrope', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+    padding: 44px 30px 80px 30px; line-height: 1.6;
+  }
+  .wrap { max-width: 1120px; margin: 0 auto; }
+  h1 { font-size: 30px; font-weight: 800; letter-spacing: -0.025em; margin: 0 0 8px 0; }
+  h2 {
+    font-size: 12px; font-weight: 800; letter-spacing: 0.11em; text-transform: uppercase;
+    color: var(--accent); margin: 52px 0 16px 0;
+  }
+  .lede { font-size: 16px; color: var(--dim); max-width: 68ch; margin: 0 0 8px 0; }
+
+  .assume {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
+    padding: 16px 18px; margin-top: 26px; font-size: 13.5px; color: var(--dim);
+  }
+  .assume b { color: var(--text); font-weight: 700; }
+  .assume ul { margin: 8px 0 0 0; padding-left: 18px; }
+  .assume li { margin-bottom: 3px; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  thead th {
+    text-align: right; font-size: 11px; font-weight: 800; letter-spacing: .07em;
+    text-transform: uppercase; color: var(--dimmer); padding: 0 10px 10px 10px;
+    border-bottom: 1px solid var(--line); white-space: nowrap;
+  }
+  thead th:first-child { text-align: left; }
+  tbody td { padding: 11px 10px; border-bottom: 1px solid oklch(31% .008 70); text-align: right; white-space: nowrap; }
+  tbody td:first-child { text-align: left; font-weight: 700; white-space: normal; }
+  tbody tr:hover { background: oklch(26% .008 70); }
+  .num { font-variant-numeric: tabular-nums; }
+  .z { color: var(--good); font-weight: 700; }
+  .hi { color: var(--bad); }
+  .mid { color: var(--warn); }
+  .scroll { overflow-x: auto; }
+  .note { font-size: 12.5px; color: var(--dimmer); margin-top: 10px; }
+
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(330px, 1fr)); gap: 16px; }
+  .card {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 18px 18px 16px 18px;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .card.pick { border-color: var(--good); background: oklch(28% .015 150); }
+  .ct { font-size: 17px; font-weight: 800; letter-spacing: -0.01em; margin: 0; }
+  .cs { font-size: 13px; color: var(--dim); margin: 0; }
+  .money {
+    font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums;
+    background: var(--panel2); border-radius: 8px; padding: 8px 11px; color: var(--text);
+  }
+  .pc { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 2px; }
+  .pc h4 {
+    margin: 0 0 5px 0; font-size: 10.5px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase;
+  }
+  .pc .p h4 { color: var(--good); }
+  .pc .c h4 { color: var(--bad); }
+  .pc ul { margin: 0; padding-left: 15px; font-size: 12.5px; color: var(--dim); line-height: 1.5; }
+  .pc li { margin-bottom: 4px; }
+  .tag {
+    align-self: flex-start; font-size: 10px; font-weight: 800; letter-spacing: .09em;
+    text-transform: uppercase; padding: 3px 8px; border-radius: 5px;
+    background: var(--good); color: oklch(20% .04 150);
+  }
+
+  .picks { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; }
+  .pick2 {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 18px;
+    border-left: 3px solid var(--accent);
+  }
+  .pick2 .q { font-size: 14px; font-weight: 700; color: var(--dim); margin: 0 0 8px 0; }
+  .pick2 .a { font-size: 19px; font-weight: 800; letter-spacing: -0.015em; margin: 0 0 8px 0; }
+  .pick2 .w { font-size: 13px; color: var(--dim); margin: 0; }
+
+  .close {
+    margin-top: 44px; background: var(--panel); border: 1px solid var(--line);
+    border-left: 3px solid var(--good); border-radius: 14px; padding: 20px 22px;
+  }
+  .close p { margin: 0 0 10px 0; font-size: 15px; color: var(--dim); }
+  .close p:last-child { margin-bottom: 0; }
+  .close b { color: var(--text); }
+  code {
+    background: var(--panel2); padding: 1px 6px; border-radius: 5px;
+    font-family: ui-monospace, 'Cascadia Code', Consolas, monospace; font-size: 13px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Where the model runs</h1>
+<p class="lede">Seven ways to generate the rewrites, with what each actually costs you as the number of people using it grows. Every figure is an estimate meant for choosing between options, not for a budget.</p>
+
+<div class="assume">
+  <b>What the numbers assume.</b>
+  <ul>
+    <li>One person does twenty remixes a day, so six hundred a month. Adjust everything proportionally.</li>
+    <li>One remix is roughly five hundred tokens in and five hundred to seven hundred fifty out.</li>
+    <li>Electricity at fifteen cents per kilowatt hour; a desktop with a GPU averaging a hundred watts.</li>
+    <li>Rented GPU at sixty cents an hour, which is a small card such as an L4 or A10G.</li>
+    <li>Provider prices move. Check them before committing; the gaps between tiers are the durable part.</li>
+  </ul>
+</div>
+
+<h2>Cost per month, by number of users</h2>
+<div class="scroll">
+<table>
+  <thead>
+    <tr>
+      <th>Option</th>
+      <th>Per remix</th>
+      <th>1 user</th>
+      <th>10 users</th>
+      <th>100 users</th>
+      <th>1,000 users</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Claude Opus 5 (built today)</td>
+      <td class="num">2.1c</td>
+      <td class="num">$13</td>
+      <td class="num">$126</td>
+      <td class="num hi">$1,260</td>
+      <td class="num hi">$12,600</td>
+    </tr>
+    <tr>
+      <td>Claude Haiku 4.5</td>
+      <td class="num">0.43c</td>
+      <td class="num">$2.60</td>
+      <td class="num">$26</td>
+      <td class="num">$258</td>
+      <td class="num mid">$2,580</td>
+    </tr>
+    <tr>
+      <td>Hosted open model, 70B class</td>
+      <td class="num">0.08c</td>
+      <td class="num">$0.48</td>
+      <td class="num">$4.80</td>
+      <td class="num">$48</td>
+      <td class="num">$480</td>
+    </tr>
+    <tr>
+      <td>Hosted open model, 8B class</td>
+      <td class="num">0.02c</td>
+      <td class="num">$0.12</td>
+      <td class="num">$1.20</td>
+      <td class="num">$12</td>
+      <td class="num">$120</td>
+    </tr>
+    <tr>
+      <td>Your PC at home</td>
+      <td class="num z">0</td>
+      <td class="num">~$11</td>
+      <td class="num">~$11</td>
+      <td class="num hi">falls over</td>
+      <td class="num hi">falls over</td>
+    </tr>
+    <tr>
+      <td>Rented GPU, always on</td>
+      <td class="num z">0</td>
+      <td class="num hi">$430</td>
+      <td class="num hi">$430</td>
+      <td class="num">$430</td>
+      <td class="num">$860+</td>
+    </tr>
+    <tr>
+      <td>On the phone</td>
+      <td class="num z">0</td>
+      <td class="num z">$0</td>
+      <td class="num z">$0</td>
+      <td class="num z">$0</td>
+      <td class="num z">$0</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<p class="note">The home row is electricity for the whole machine, not per user, which is why it does not move. It stops working long before a hundred people, not because of cost but because one consumer card serves a handful of requests at a time.</p>
+
+<h2>The seven, in detail</h2>
+<div class="cards">
+
+  <div class="card">
+    <p class="ct">1 · Claude API</p>
+    <p class="cs">What the code does today. Best writing by a clear margin.</p>
+    <div class="money">2.1c a remix · $13 per user each month</div>
+    <div class="pc">
+      <div class="p"><h4>For</h4><ul>
+        <li>Best at the thing that matters: not changing what you promised</li>
+        <li>Already written and working</li>
+        <li>No infrastructure at all</li>
+      </ul></div>
+      <div class="c"><h4>Against</h4><ul>
+        <li>Cost grows with every user, forever</li>
+        <li>Private messages leave the phone</li>
+        <li>Needs a proxy before anyone else installs it</li>
+      </ul></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <p class="ct">2 · A cheaper cloud model</p>
+    <p class="cs">Same shape, smaller model. Haiku, or an open model served by someone else.</p>
+    <div class="money">0.02c to 0.43c a remix · 12c to $2.60 per user</div>
+    <div class="pc">
+      <div class="p"><h4>For</h4><ul>
+        <li>Effectively free at the scale you are at</li>
+        <li>One-line change from what exists</li>
+        <li>No ops, no downloads, works on any phone</li>
+      </ul></div>
+      <div class="c"><h4>Against</h4><ul>
+        <li>Still an API bill, however small</li>
+        <li>Messages still leave the phone</li>
+        <li>Quality drop needs measuring, not assuming</li>
+      </ul></div>
+    </div>
+  </div>
+
+  <div class="card pick">
+    <span class="tag">Best for friends and family</span>
+    <p class="ct">3 · Your PC at home</p>
+    <p class="cs">Ollama on a machine you own, reached through a free tunnel.</p>
+    <div class="money">~$11 a month in electricity, whoever uses it</div>
+    <div class="pc">
+      <div class="p"><h4>For</h4><ul>
+        <li>No per-user cost at all</li>
+        <li>Runs a 7B to 14B model, far better than anything a phone fits</li>
+        <li>Nothing to download, works on any phone</li>
+        <li>An afternoon to set up</li>
+        <li>Swap models freely without shipping an update</li>
+      </ul></div>
+      <div class="c"><h4>Against</h4><ul>
+        <li>Your uptime is their uptime</li>
+        <li>Handful of simultaneous users, then it queues</li>
+        <li>You are exposing an endpoint and must lock it down</li>
+        <li>Cannot grow into a product</li>
+      </ul></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <p class="ct">4 · Rented GPU, always on</p>
+    <p class="cs">The same thing in a datacentre.</p>
+    <div class="money">~$430 a month before you have a single user</div>
+    <div class="pc">
+      <div class="p"><h4>For</h4><ul>
+        <li>Real uptime and real bandwidth</li>
+        <li>Cheapest per call once traffic is heavy</li>
+      </ul></div>
+      <div class="c"><h4>Against</h4><ul>
+        <li>Costs more than the Claude API until you have hundreds of users</li>
+        <li>Fixed bill from day one</li>
+        <li>You now run servers</li>
+      </ul></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <p class="ct">5 · Serverless GPU</p>
+    <p class="cs">Billed by the second, scales to zero.</p>
+    <div class="money">Fractions of a cent per call, plus idle if kept warm</div>
+    <div class="pc">
+      <div class="p"><h4>For</h4><ul>
+        <li>No bill when nobody is using it</li>
+        <li>Absorbs a spike without planning</li>
+      </ul></div>
+      <div class="c"><h4>Against</h4><ul>
+        <li>Cold starts can run tens of seconds, which kills this interaction</li>
+        <li>Avoiding that means paying to stay warm, which is option four</li>
+      </ul></div>
+    </div>
+  </div>
+
+  <div class="card pick">
+    <span class="tag">Best if it becomes a product</span>
+    <p class="ct">6 · On the phone</p>
+    <p class="cs">A quantised small model downloaded on first run.</p>
+    <div class="money">Zero, at any number of users, forever</div>
+    <div class="pc">
+      <div class="p"><h4>For</h4><ul>
+        <li>The only option whose bill does not grow when you succeed</li>
+        <li>Nothing leaves the phone, which is the strongest thing this app could say</li>
+        <li>Works on a plane, on the underground, with no signal</li>
+        <li>No servers, no keys, no proxy</li>
+      </ul></div>
+      <div class="c"><h4>Against</h4><ul>
+        <li>Several hundred megabytes to download before first use</li>
+        <li>Slowest of all, seconds not milliseconds</li>
+        <li>Weakest writing, needs constrained output and probably fine-tuning</li>
+        <li>Excludes older and cheaper phones, so you need a fallback anyway</li>
+      </ul></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <p class="ct">7 · Everyone brings their own key</p>
+    <p class="cs">Each person pastes in their own API key.</p>
+    <div class="money">Nothing, to you</div>
+    <div class="pc">
+      <div class="p"><h4>For</h4><ul>
+        <li>Best possible writing at no cost to you</li>
+        <li>No infrastructure, no liability for their spend</li>
+      </ul></div>
+      <div class="c"><h4>Against</h4><ul>
+        <li>Asking a friend to open a developer account is a lot to ask</li>
+        <li>Realistically nobody outside software will do it</li>
+        <li>Storing other people's keys on a phone is its own problem</li>
+      </ul></div>
+    </div>
+  </div>
+
+</div>
+
+<h2>So which one</h2>
+<div class="picks">
+  <div class="pick2">
+    <p class="q">Me and a dozen friends, this month, free</p>
+    <p class="a">Your PC at home</p>
+    <p class="w">Ollama, a small Qwen, and a free Cloudflare tunnel with a shared token. Costs pocket change in electricity, runs a model several times larger than any phone fits, and you sideload the app rather than shipping it. Nothing else gets you this quality for nothing.</p>
+  </div>
+  <div class="pick2">
+    <p class="q">Strangers install it and I refuse a bill</p>
+    <p class="a">On the phone</p>
+    <p class="w">The only architecture where a thousand users costs the same as one. Pay for it in download size, latency and writing quality, and keep a device check with a graceful message for phones that cannot manage.</p>
+  </div>
+  <div class="pick2">
+    <p class="q">I want it good and a tiny bill is fine</p>
+    <p class="a">A cheap hosted open model</p>
+    <p class="w">Around a dollar a month for ten people. If the objection to an API was the price rather than the principle, this is worth a second look, because it removes every operational problem on this page for roughly nothing.</p>
+  </div>
+</div>
+
+<div class="close">
+  <p><b>The decision is cheaper than it looks, because it is reversible.</b> Everything on this page sits behind one interface, <code>VariantGenerator</code>. Swapping where the model runs touches one file and leaves the screens, the bubble and the tests alone.</p>
+  <p>So the sequence beats the choice. Stand up the home server this week, because it is the fastest path to a working app you can hand to someone, and it tells you the thing you actually need to know: whether a small open model can produce a usable grid at all. If it can, on-device becomes a port rather than a gamble. If it cannot, you have learned that for the price of an afternoon instead of a fortnight of Android work.</p>
+</div>
+
+</div>
+</body>
+</html>
