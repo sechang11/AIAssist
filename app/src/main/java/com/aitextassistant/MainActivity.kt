@@ -42,7 +42,9 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.aitextassistant.bubble.BubbleService
 import com.aitextassistant.generate.Generators
+import com.aitextassistant.generate.Suggesters
 import com.aitextassistant.ui.RemixScreen
+import com.aitextassistant.ui.RepliesScreen
 import com.aitextassistant.ui.RemixTheme
 
 /**
@@ -71,7 +73,23 @@ class MainActivity : ComponentActivity() {
                     val vm: RemixViewModel = viewModel(
                         factory = RemixViewModel.factory(Generators.default(this)),
                     )
-                    if (vm.state is RemixUiState.Idle) {
+                    val replies: RepliesViewModel = viewModel(
+                        factory = RepliesViewModel.factory(Suggesters.default(this)),
+                    )
+                    if (replies.state !is RepliesUiState.Idle) {
+                        RepliesScreen(
+                            state = replies.state,
+                            incoming = replies.incoming,
+                            onPick = { copyToClipboard(it.text) },
+                            onRemix = { reply ->
+                                // Pick the stance here, choose how it sounds there.
+                                replies.reset()
+                                vm.load(reply.text)
+                            },
+                            onMore = replies::more,
+                            onCancel = replies::reset,
+                        )
+                    } else if (vm.state is RemixUiState.Idle) {
                         Home(
                             canDrawOverlays = canDrawOverlays,
                             bubbleRunning = BubbleService.isRunning,
@@ -79,6 +97,7 @@ class MainActivity : ComponentActivity() {
                             onStartBubble = ::askThenStartBubble,
                             onStopBubble = { BubbleService.stop(this) },
                             onRemix = vm::load,
+                            onSuggestReplies = replies::load,
                         )
                     } else {
                         RemixScreen(
@@ -141,8 +160,10 @@ private fun Home(
     onStartBubble: () -> Unit,
     onStopBubble: () -> Unit,
     onRemix: (String) -> Unit,
+    onSuggestReplies: (String) -> Unit,
 ) {
     var draft by remember { mutableStateOf("") }
+    var incoming by remember { mutableStateOf("") }
     val context = LocalContext.current
     val settings = remember { com.aitextassistant.generate.Settings(context) }
     var host by remember { mutableStateOf(settings.ollamaHost) }
@@ -283,6 +304,22 @@ private fun Home(
                 .fillMaxWidth()
                 .heightIn(min = 52.dp),
         ) { Text("Remix") }
+
+        Text("Reply to something", style = MaterialTheme.typography.titleSmall)
+        OutlinedTextField(
+            value = incoming,
+            onValueChange = { incoming = it },
+            modifier = Modifier.fillMaxWidth(),
+            minLines = 3,
+            label = { Text("A message someone sent you") },
+        )
+        Button(
+            onClick = { onSuggestReplies(incoming) },
+            enabled = incoming.isNotBlank(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(min = 52.dp),
+        ) { Text("Suggest replies") }
 
         Spacer(Modifier.height(24.dp))
     }
