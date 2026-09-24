@@ -26,10 +26,39 @@ class Settings(context: Context) {
 
     val usingOllama: Boolean get() = ollamaHost.isNotBlank()
 
+    /**
+     * Where the phone looks for a newer build. Left alone it follows the model
+     * server to port [PUBLISH_PORT], because the same machine publishes both
+     * and asking for the address twice is a way to get it wrong once.
+     */
+    var updateHost: String
+        get() {
+            val set = prefs.getString(UPDATES, "").orEmpty().trim().trimEnd('/')
+            if (set.isNotBlank()) return set
+            val host = ollamaHost
+            if (host.isBlank()) return ""
+            return host.substringBeforeLast(':') + ":" + PUBLISH_PORT
+        }
+        set(value) = prefs.edit().putString(UPDATES, value.trim().trimEnd('/')).apply()
+
+    /** True when [updateHost] came from the model server rather than being typed. */
+    val updateHostIsInherited: Boolean
+        get() = prefs.getString(UPDATES, "").orEmpty().isBlank() && ollamaHost.isNotBlank()
+
     private companion object {
         const val HOST = "ollama_host"
         const val MODEL = "ollama_model"
-        const val DEFAULT_MODEL = "qwen2.5:1.5b-instruct"
+        const val UPDATES = "update_host"
+        const val PUBLISH_PORT = "8099"
+
+        /**
+         * The 7B, not the 1.5B. On a LAN server there is no reason to run the
+         * small one: the eval has the 7B ahead on faithfulness by four points
+         * and on the mechanical score by seven, and a machine that can serve
+         * either answers in about the same time. The 1.5B matters for the
+         * on-phone build, which is a different question.
+         */
+        const val DEFAULT_MODEL = "qwen2.5:7b-instruct"
     }
 }
 

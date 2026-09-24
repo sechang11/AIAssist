@@ -1,0 +1,46 @@
+{
+  "_": "Shared by ReplyGuardsTest.kt and eval/replies.py. Neither owns it; both must agree. Add a case here when you find a reply that should not have reached the screen.",
+
+  "tidyIntent": [
+    ["acknowledge receipt, provide brief update", "acknowledge receipt"],
+    ["offer an alternative solution", "offer an alternative"],
+    ["Decline Politely", "decline politely"],
+    ["ask for details.", "ask for details"],
+    ["  ", "reply"],
+    ["defer", "defer"]
+  ],
+
+  "tidyText": [
+    ["hey, sure thing that works", "sure thing that works"],
+    ["Hi! i can do that", "i can do that"],
+    ["sounds good to me, best regards", "sounds good to me"],
+    ["no worries at all", "no worries at all"],
+    ["Hello, thanks for letting me know", "thanks for letting me know"]
+  ],
+
+  "inventedTimes": [
+    ["you free for a call at some point today", "how about 3pm?", ["3pm"]],
+    ["you free for a call at some point today", "sure, today works", []],
+    ["my mum died on sunday. funeral is the 14th", "i can make the 14th", []],
+    ["my mum died on sunday. funeral is the 14th", "is monday any good?", ["monday"]],
+    ["are you free saturday?", "saturday is good for me", []],
+    ["running late, maybe 20 mins", "no worries, take your time", []],
+    ["can you cover my shift on thursday?", "thursday is fine but not friday", ["friday"]],
+    ["you free for a call?", "that may work, let me see", []]
+  ],
+
+  "isStub": [
+    ["sure thing!", true],
+    ["that's rough", true],
+    ["what time?", false],
+    ["ok no worries", false],
+    ["sorry busy", true],
+    ["why?", false]
+  ],
+
+  "fingerprint": [
+    ["Sure, that works!", "sure that works"],
+    ["sure that works", "sure that works"],
+    ["  Sure   that  works  ", "sure that works"]
+  ]
+}

@@ -31,6 +31,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -46,6 +47,8 @@ import com.aitextassistant.generate.Suggesters
 import com.aitextassistant.ui.RemixScreen
 import com.aitextassistant.ui.RepliesScreen
 import com.aitextassistant.ui.RemixTheme
+import com.aitextassistant.ui.UpdateBanner
+import com.aitextassistant.update.Updates
 
 /**
  * Setup plus a playground, so the remix screen can be exercised without bouncing
@@ -54,8 +57,9 @@ import com.aitextassistant.ui.RemixTheme
  */
 class MainActivity : ComponentActivity() {
 
-    /** Refreshed on resume, because the user grants this in a settings screen we cannot observe. */
+    /** Refreshed on resume, because the user grants these in settings screens we cannot observe. */
     private var canDrawOverlays by mutableStateOf(false)
+    private var canInstall by mutableStateOf(false)
 
     private val requestNotifications =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { startBubble() }
@@ -63,6 +67,7 @@ class MainActivity : ComponentActivity() {
     override fun onResume() {
         super.onResume()
         canDrawOverlays = BubbleService.canDrawOverlays(this)
+        canInstall = Updates.canInstall(this)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -76,6 +81,10 @@ class MainActivity : ComponentActivity() {
                     val replies: RepliesViewModel = viewModel(
                         factory = RepliesViewModel.factory(Suggesters.default(this)),
                     )
+                    val updates: UpdateViewModel = viewModel(
+                        factory = UpdateViewModel.factory(application),
+                    )
+                    LaunchedEffect(Unit) { updates.checkQuietly() }
                     if (replies.state !is RepliesUiState.Idle) {
                         RepliesScreen(
                             state = replies.state,
@@ -98,6 +107,12 @@ class MainActivity : ComponentActivity() {
                             onStopBubble = { BubbleService.stop(this) },
                             onRemix = vm::load,
                             onSuggestReplies = replies::load,
+                            updateState = updates.state,
+                            canInstall = canInstall,
+                            onInstall = { install(updates) },
+                            onAllowInstalls = { Updates.openInstallPermission(this) },
+                            onDismissUpdate = updates::dismiss,
+                            onCheckUpdates = updates::checkNow,
                         )
                     } else {
                         RemixScreen(
@@ -145,6 +160,12 @@ class MainActivity : ComponentActivity() {
         BubbleService.start(this)
     }
 
+    private fun install(updates: UpdateViewModel) {
+        val ready = updates.state as? UpdateUiState.Ready ?: return
+        updates.downloading()
+        Updates.download(this, ready.build) { why -> updates.failed(why) }
+    }
+
     private fun copyToClipboard(text: String) {
         getSystemService(ClipboardManager::class.java)
             ?.setPrimaryClip(ClipData.newPlainText(getString(R.string.app_name), text))
@@ -161,6 +182,12 @@ private fun Home(
     onStopBubble: () -> Unit,
     onRemix: (String) -> Unit,
     onSuggestReplies: (String) -> Unit,
+    updateState: UpdateUiState,
+    canInstall: Boolean,
+    onInstall: () -> Unit,
+    onAllowInstalls: () -> Unit,
+    onDismissUpdate: () -> Unit,
+    onCheckUpdates: () -> Unit,
 ) {
     var draft by remember { mutableStateOf("") }
     var incoming by remember { mutableStateOf("") }
@@ -178,6 +205,14 @@ private fun Home(
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         Text("Remix", style = MaterialTheme.typography.headlineMedium)
+
+        UpdateBanner(
+            state = updateState,
+            installAllowed = canInstall,
+            onInstall = onInstall,
+            onAllowInstalls = onAllowInstalls,
+            onDismiss = onDismissUpdate,
+        )
 
         Card {
             Column(
@@ -222,6 +257,39 @@ private fun Home(
                         .fillMaxWidth()
                         .heightIn(min = 52.dp),
                 ) { Text(if (saved) "Saved. Reopen the app to apply." else "Save") }
+            }
+        }
+
+        Card {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Text("Updates", style = MaterialTheme.typography.titleSmall)
+                Text(
+                    "Running " + Updates.runningName + ". New builds are published " +
+                        "to the same machine that serves the model, so there is " +
+                        "nothing else to set up. It checks when you open the app " +
+                        "and never installs on its own.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Text(
+                    if (settings.updateHost.isBlank()) {
+                        "No address yet. Set the server above."
+                    } else if (settings.updateHostIsInherited) {
+                        "Looking at " + settings.updateHost
+                    } else {
+                        "Looking at " + settings.updateHost + " (set by hand)"
+                    },
+                    style = MaterialTheme.typography.bodySmall,
+                )
+                OutlinedButton(
+                    onClick = onCheckUpdates,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = 52.dp),
+                ) { Text("Check now") }
             }
         }
 

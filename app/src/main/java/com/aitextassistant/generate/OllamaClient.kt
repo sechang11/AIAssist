@@ -86,6 +86,13 @@ class OllamaClient(private val host: String, private val model: String) {
             .put("maxItems", n)
             .put("items", items)
 
+        /**
+         * Property order is load-bearing, not cosmetic: constrained decoding
+         * emits the keys in the order given, so a field placed first is one the
+         * model must commit to before writing the rest. Android's JSONObject is
+         * backed by a LinkedHashMap and preserves it. The JVM's org.json is not,
+         * which costs nothing because unit tests never send a schema anywhere.
+         */
         fun obj(required: List<String>, properties: JSONObject): JSONObject = JSONObject()
             .put("type", "object")
             .put("required", JSONArray(required))

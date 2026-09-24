@@ -31,30 +31,53 @@ interface ReplySuggester {
      *   genuinely different ones rather than rewording the same three.
      */
     suspend fun suggest(incoming: String, avoid: List<String> = emptyList(), count: Int = 3): List<Reply>
+
+    companion object {
+        /**
+         * Ask for more than will be shown. [ReplyGuards] drops the replies that
+         * invent a time or arrive as a two-word stub, and without headroom a
+         * single dropped reply leaves a gap on screen.
+         */
+        fun overAsk(count: Int): Int = count + 2
+    }
 }
 
 internal object ReplyPrompt {
 
+    /**
+     * Short on purpose. Every extra rule here cost compliance on all the others;
+     * the mechanical ones now live in [ReplyGuards], which leaves this to say
+     * only what code cannot check.
+     */
     fun system(count: Int): String = """
-        You suggest replies to a message someone has just received.
+        You suggest replies to a message someone has just received, so they can
+        send one without typing it.
 
-        Give exactly $count replies that take genuinely different positions. Agreeing,
-        declining, deferring, asking something back. Not $count phrasings of one answer:
-        if two of them could both be sent, they are not different enough.
+        Read what kind of message it is first. Something was asked, or proposed,
+        or requested, or simply told to them. Only a question can be answered yes
+        or no. Forcing a yes and a no onto a message that asked nothing gives you
+        replies that all mean the same thing under different labels.
 
-        Each is one short text message, the length a person actually sends from a
-        phone. Ordinary texting register: contractions, lowercase is fine, no
-        greeting and no sign-off.
+        Then give exactly $count replies that differ in what they do, not in how
+        they sound. Three ways of agreeing is one reply printed three times.
+        Prefer the ones they would have to stop and word carefully over the ones
+        they could thumb out without thinking.
 
-        Invent nothing about the sender's life. No reasons, no times, no names, no
-        excuses that were not already in the message they received. If a reply
-        needs a reason to make sense, leave the reason out rather than making one
-        up; they can add the true one themselves.
+        If the message carries bad news, grief or illness, every reply must be a
+        kind one, and none of them may weigh it up, negotiate with it or decline
+        it. Vary only what they offer.
 
-        Give each a two or three word label for what it does, not how it sounds.
+        Invent nothing about their life: no reason, time, place, name, job or
+        excuse that the message did not already contain. Where it does not say
+        who is in the wrong, do not decide.
 
-        Reply with a JSON object holding one key, "replies", an array of exactly
-        $count objects, each with "intent" and "text".
+        Each reply is one text message in ordinary texting register: contractions,
+        lowercase, no greeting, no sign-off, no emoji. Label each with at most
+        three words of your own for what it does here.
+
+        Reply with a JSON object: "reading", a few words on what kind of message
+        this is, then "replies", an array of exactly $count objects, each with
+        "intent" and "text".
     """.trimIndent()
 
     fun user(incoming: String, avoid: List<String>): String {
@@ -92,31 +115,38 @@ class OllamaReplySuggester(host: String, model: String) : ReplySuggester {
     private val client = OllamaClient(host, model)
 
     override suspend fun suggest(incoming: String, avoid: List<String>, count: Int): List<Reply> {
+        val asked = ReplySuggester.overAsk(count)
+        // "reading" first, and it is not decoration. Constrained decoding emits
+        // the keys in this order, so the model has to name what kind of message
+        // it is before it writes a single reply, and it stops forcing a yes and
+        // a no onto messages that asked nothing. Nothing reads the field.
         val schema = OllamaClient.obj(
-            listOf("replies"),
-            JSONObject().put(
-                "replies",
-                OllamaClient.fixedArray(
-                    count,
-                    OllamaClient.obj(
-                        listOf("intent", "text"),
-                        JSONObject()
-                            .put("intent", OllamaClient.string)
-                            .put("text", OllamaClient.string),
+            listOf("reading", "replies"),
+            JSONObject()
+                .put("reading", OllamaClient.string)
+                .put(
+                    "replies",
+                    OllamaClient.fixedArray(
+                        asked,
+                        OllamaClient.obj(
+                            listOf("intent", "text"),
+                            JSONObject()
+                                .put("intent", OllamaClient.string)
+                                .put("text", OllamaClient.string),
+                        ),
                     ),
                 ),
-            ),
         )
         val raw = client.chat(
-            system = ReplyPrompt.system(count),
+            system = ReplyPrompt.system(asked),
             user = ReplyPrompt.user(incoming, avoid),
             schema = schema,
             // Higher than the rewriter uses. Three replies that differ is the
             // whole job here, and there is no original to drift away from.
             temperature = 0.9,
-            maxTokens = 400,
+            maxTokens = 600,
         )
-        return ReplyPrompt.parse(raw, count)
+        return ReplyGuards.keep(incoming, ReplyPrompt.parse(raw, asked), avoid, count)
     }
 }
 
@@ -129,11 +159,12 @@ class ClaudeReplySuggester(private val apiKey: String) : ReplySuggester {
         avoid: List<String>,
         count: Int,
     ): List<Reply> = withContext(Dispatchers.IO) {
+        val asked = ReplySuggester.overAsk(count)
         val params = MessageCreateParams.builder()
             .model("claude-opus-5")
             .maxTokens(2_000L)
             .outputConfig(OutputConfig.builder().effort(OutputConfig.Effort.LOW).build())
-            .system(ReplyPrompt.system(count))
+            .system(ReplyPrompt.system(asked))
             .addUserMessage(ReplyPrompt.user(incoming, avoid))
             .build()
 
@@ -145,7 +176,7 @@ class ClaudeReplySuggester(private val apiKey: String) : ReplySuggester {
         val text = message.content()
             .mapNotNull { block -> block.text().orElse(null)?.text() }
             .joinToString("\n")
-        ReplyPrompt.parse(text, count)
+        ReplyGuards.keep(incoming, ReplyPrompt.parse(text, asked), avoid, count)
     }
 }
 

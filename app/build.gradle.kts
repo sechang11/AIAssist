@@ -16,6 +16,13 @@ val anthropicApiKey: String = Properties().run {
     getProperty("ANTHROPIC_API_KEY", "")
 }
 
+// Passed in by scratchpad/sync-build.sh, which counts the commits on the
+// machine that has the git history. The build box holds an unpacked copy of the
+// tree and no .git, and a version that does not climb makes the in-app updater
+// useless: the phone compares these two numbers and nothing else.
+val buildNumber: Int = (providers.gradleProperty("remixVersionCode").orNull ?: "1").toInt()
+val buildName: String = providers.gradleProperty("remixVersionName").orNull ?: "0.1"
+
 android {
     namespace = "com.aitextassistant"
     compileSdk = 35
@@ -24,8 +31,8 @@ android {
         applicationId = "com.aitextassistant"
         minSdk = 26          // java.time / Optional / Stream, used by anthropic-java
         targetSdk = 35
-        versionCode = 1
-        versionName = "0.1"
+        versionCode = buildNumber
+        versionName = buildName
         buildConfigField("String", "ANTHROPIC_API_KEY", "\"$anthropicApiKey\"")
     }
 
