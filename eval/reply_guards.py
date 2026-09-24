@@ -29,6 +29,15 @@ TIMEY = re.compile(
     r")\b",
     re.IGNORECASE,
 )
+# Reasons the reader never gave. Inventing one is worse in practice than
+# inventing a time, because "sorry, busy" reads as true and gets sent. Word
+# boundaries mean "that works for me" is not caught by "work".
+EXCUSE = re.compile(
+    r"\b(busy|swamped|work|working|meeting|shift|sick|unwell|dentist|doctor|"
+    r"appointment|hungover|exhausted)\b|"
+    r"\b(?:got|have|having|made|already have) (?:other )?plans\b",
+    re.IGNORECASE,
+)
 GREETING = re.compile(r"^\s*(hi|hey|hello|dear)\b[\s,!.]*", re.IGNORECASE)
 SIGNOFF = re.compile(
     r"[\s,]*\b(best regards|kind regards|warm regards|regards|sincerely|"
@@ -42,13 +51,24 @@ MIN_WORDS = 3
 MAX_CHARS = 200
 MAX_LABEL_WORDS = 3
 
+# A label may not end on one of these; it is waiting for the next word.
+DANGLING = {
+    "a", "an", "the", "to", "of", "for", "and", "or", "with", "about",
+    "some", "any", "their", "your", "my", "listening",
+}
+
 
 def tidy_intent(raw):
     first_clause = raw.split(",")[0].strip().rstrip(".!:;")
     words = [w for w in WHITESPACE.split(first_clause) if w]
     if not words:
         return "reply"
-    return " ".join(words[:MAX_LABEL_WORDS]).lower()
+    # "offer a listening ear" cut to three words ends on "listening", which is
+    # worse than two words. Drop anything left dangling.
+    cut = words[:MAX_LABEL_WORDS]
+    while len(cut) > 1 and cut[-1].lower() in DANGLING:
+        cut = cut[:-1]
+    return " ".join(cut).lower()
 
 
 def tidy_text(raw):
@@ -59,6 +79,16 @@ def invented_times(incoming, text):
     said = {m.group(0).lower() for m in TIMEY.finditer(incoming)}
     out = []
     for match in TIMEY.finditer(text):
+        value = match.group(0).lower()
+        if value not in said and value not in out:
+            out.append(value)
+    return out
+
+
+def invented_excuses(incoming, text):
+    said = {m.group(0).lower() for m in EXCUSE.finditer(incoming)}
+    out = []
+    for match in EXCUSE.finditer(text):
         value = match.group(0).lower()
         if value not in said and value not in out:
             out.append(value)
@@ -91,6 +121,8 @@ def keep(incoming, replies, already_offered=(), limit=3):
             continue
         if invented_times(incoming, text):
             continue
+        if invented_excuses(incoming, text):
+            continue
         print_ = fingerprint(text)
         if not print_ or print_ in seen:
             continue
@@ -115,6 +147,10 @@ def main():
         got = invented_times(incoming, text)
         if got != want:
             failures.append(f"invented_times(..., {text!r}) -> {got}, wanted {want}")
+    for incoming, text, want in cases["inventedExcuses"]:
+        got = invented_excuses(incoming, text)
+        if got != want:
+            failures.append(f"invented_excuses(..., {text!r}) -> {got}, wanted {want}")
     for text, want in cases["isStub"]:
         got = is_stub(text)
         if got != want:

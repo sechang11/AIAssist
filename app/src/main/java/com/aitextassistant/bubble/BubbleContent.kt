@@ -36,8 +36,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.aitextassistant.RemixUiState
 import com.aitextassistant.RemixViewModel
+import com.aitextassistant.RepliesUiState
+import com.aitextassistant.RepliesViewModel
 import com.aitextassistant.ui.RemixScreen
 import com.aitextassistant.ui.RemixTheme
+import com.aitextassistant.ui.RepliesScreen
 
 /** The resting state: a small circle that sits over whatever app you are in. */
 @Composable
@@ -107,14 +110,16 @@ fun DismissTarget(armed: Boolean) {
 }
 
 /**
- * The opened bubble. It reuses the same remix screen as the rest of the app, so
- * the interaction is identical wherever you reach it from. The one difference is
+ * The opened bubble. It reuses the same screens as the rest of the app, so the
+ * interaction is identical wherever you reach it from. The one difference is
  * the primary action: the bubble cannot type into the app behind it, so the
  * finished message goes to the clipboard for you to paste.
  */
 @Composable
 fun ExpandedPanel(
     vm: RemixViewModel,
+    replies: RepliesViewModel,
+    clipboard: String,
     onCollapse: () -> Unit,
     onCopy: (String) -> Unit,
     onStop: () -> Unit,
@@ -128,10 +133,21 @@ fun ExpandedPanel(
             color = MaterialTheme.colorScheme.surface,
             shadowElevation = 12.dp,
         ) {
-            if (vm.state is RemixUiState.Idle) {
-                PasteFallback(onRemix = vm::load, onCollapse = onCollapse, onStop = onStop)
-            } else {
-                RemixScreen(
+            when {
+                replies.state !is RepliesUiState.Idle -> RepliesScreen(
+                    state = replies.state,
+                    incoming = replies.incoming,
+                    onPick = { reply -> onCopy(reply.text); onCollapse() },
+                    onRemix = { reply ->
+                        // Their message chose the stance; this chooses the words.
+                        replies.reset()
+                        vm.load(reply.text)
+                    },
+                    onMore = replies::more,
+                    onCancel = replies::reset,
+                )
+
+                vm.state !is RemixUiState.Idle -> RemixScreen(
                     state = vm.state,
                     original = vm.original,
                     primaryActionLabel = "Copy",
@@ -141,70 +157,18 @@ fun ExpandedPanel(
                     onRestore = vm::restore,
                     onApplyTone = vm::applyTone,
                     onPrimaryAction = { text -> onCopy(text); onCollapse() },
-                    onCancel = onCollapse,
+                    onCancel = vm::reset,
                     onRetry = vm::retry,
                 )
+
+                else -> BubbleChooser(
+                    clipboard = clipboard,
+                    onReword = vm::load,
+                    onReply = replies::load,
+                    onCollapse = onCollapse,
+                    onStop = onStop,
+                )
             }
-        }
-    }
-}
-
-/**
- * Shown when the clipboard is empty, which is also what you get if a device
- * refuses the focused-window clipboard read. Typing or pasting here always
- * works, so the bubble is never a dead end.
- */
-@Composable
-private fun PasteFallback(
-    onRemix: (String) -> Unit,
-    onCollapse: () -> Unit,
-    onStop: () -> Unit,
-) {
-    var draft by remember { mutableStateOf("") }
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(20.dp),
-        verticalArrangement = Arrangement.spacedBy(14.dp),
-    ) {
-        Text(
-            "Nothing copied yet",
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-        )
-        Text(
-            "Copy the message you want to rework, then tap the bubble again. " +
-                "Or paste it here.",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-
-        OutlinedTextField(
-            value = draft,
-            onValueChange = { draft = it },
-            modifier = Modifier.fillMaxWidth(),
-            minLines = 3,
-            label = { Text("Your message") },
-        )
-
-        Button(
-            onClick = { onRemix(draft) },
-            enabled = draft.isNotBlank(),
-            modifier = Modifier
-                .fillMaxWidth()
-                .heightIn(min = 52.dp),
-        ) { Text("Remix") }
-
-        Spacer(Modifier.height(2.dp))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            TextButton(onClick = onStop) { Text("Hide the bubble") }
-            TextButton(onClick = onCollapse) { Text("Close") }
         }
     }
 }

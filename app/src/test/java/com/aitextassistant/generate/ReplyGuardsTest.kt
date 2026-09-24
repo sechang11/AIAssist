@@ -54,6 +54,14 @@ class ReplyGuardsTest {
     }
 
     @Test
+    fun `an excuse the incoming message never gave is an invention`() {
+        for (case in cases("inventedExcuses")) {
+            val wanted = case[2].jsonArray.map { it.jsonPrimitive.content }
+            assertEquals("on: ${case.str(1)}", wanted, ReplyGuards.inventedExcuses(case.str(0), case.str(1)))
+        }
+    }
+
+    @Test
     fun `two curt words is a stub but a short question is not`() {
         for (case in cases("isStub")) {
             val wanted = case[1].jsonPrimitive.boolean

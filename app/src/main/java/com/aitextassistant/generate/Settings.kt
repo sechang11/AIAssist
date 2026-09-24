@@ -66,6 +66,13 @@ object Generators {
 
     val hasApiKey: Boolean get() = com.aitextassistant.BuildConfig.ANTHROPIC_API_KEY.isNotBlank()
 
+    /**
+     * Nothing configured, so the stand-in will answer. The screens showing
+     * output say so, because a stand-in that leaves a clean sentence alone is
+     * indistinguishable from an app that does not work.
+     */
+    fun usingStub(context: Context): Boolean = !Settings(context).usingOllama && !hasApiKey
+
     /** What the current configuration will actually use, for the UI to say so. */
     fun describe(context: Context): String {
         val settings = Settings(context)

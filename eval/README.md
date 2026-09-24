@@ -100,6 +100,38 @@ python eval/grade.py
 backend needs `pip install anthropic` and a key, and exists only to give the
 table a ceiling; there is still no Opus row.
 
+### Looking at it rather than scoring it
+
+A score tells you something moved. It does not tell you the funeral case now
+answers with condolences instead of "let's see how busy i am", and that was
+found by reading, not by grading.
+
+```bash
+python eval/try.py "cant make friday sorry"
+```
+
+One message through the rewrite pipeline, printed as the phone would lay it
+out, with a note when a beat came back unrewritten.
+
+```bash
+python eval/replies.py --model qwen2.5:7b-instruct --more
+```
+
+The reply suggester, through the same guards the app applies, against ten
+incoming messages picked to be awkward: a bereavement, a rent rise, a message
+that says only "we need to talk". `--more` also asks for a second set and
+checks none of them repeat the first. It prints complaints, and a set is
+counted short when the guards dropped enough that fewer than three replies
+survived.
+
+```bash
+python eval/bleed.py
+```
+
+How often one beat's rewrite swallows the beat next to it. Every per-beat guard
+looks at one beat alone, so none of them can see this; the rewrites are each
+faithful and the assembled message still says the same thing twice.
+
 ## What it measures
 
 `grade.py`, all mechanical and all cheap:
@@ -195,6 +227,17 @@ directory scores, runs the Python splitter over the cases the Kotlin tests
 assert, and checks the messages file is well formed. It exits non-zero on a
 mismatch, so it belongs in a hook. `PromptParityTest` guards the same text from
 the Kotlin side; neither check sees both languages alone.
+
+The reply guards are kept in step a different way, because there is no prompt to
+pin: `ReplyGuards.kt` and `reply_guards.py` are checked against the same
+fixtures in `reply_guards.json`, which neither of them owns.
+
+```bash
+python eval/reply_guards.py
+```
+
+A rule changed in one language and not the other stops matching the file, and
+whichever side was left behind says so.
 
 Add your own messages as you hit failures in real use. A test set that grows out
 of actual mistakes is worth more than one written in advance, this one included.

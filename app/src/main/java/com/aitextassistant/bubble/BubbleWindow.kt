@@ -13,6 +13,9 @@ import android.view.View
 import android.view.WindowManager
 import android.widget.FrameLayout
 import android.widget.Toast
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.ComposeView
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.setViewTreeLifecycleOwner
@@ -20,7 +23,9 @@ import androidx.lifecycle.setViewTreeViewModelStoreOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.aitextassistant.RemixUiState
 import com.aitextassistant.RemixViewModel
+import com.aitextassistant.RepliesViewModel
 import com.aitextassistant.generate.Generators
+import com.aitextassistant.generate.Suggesters
 import kotlin.math.min
 
 /**
@@ -55,6 +60,17 @@ class BubbleWindow(
     private val viewModel: RemixViewModel =
         ViewModelProvider(owner, RemixViewModel.factory(Generators.default(context)))
             .get(RemixViewModel::class.java)
+
+    private val repliesModel: RepliesViewModel =
+        ViewModelProvider(owner, RepliesViewModel.factory(Suggesters.default(context)))
+            .get(RepliesViewModel::class.java)
+
+    /**
+     * What was on the clipboard when the panel last opened. Held rather than
+     * acted on: the panel asks whether you wrote it or were sent it, and
+     * guessing costs a model call per beat.
+     */
+    private var clipboard by mutableStateOf("")
 
     private var panel: View? = null
 
@@ -98,6 +114,8 @@ class BubbleWindow(
             setContent {
                 ExpandedPanel(
                     vm = viewModel,
+                    replies = repliesModel,
+                    clipboard = clipboard,
                     onCollapse = { collapseLater() },
                     onCopy = ::copyToClipboard,
                     onStop = onStopRequested,
@@ -148,15 +166,19 @@ class BubbleWindow(
 
     // ---- text in and out ----------------------------------------------------
 
+    /**
+     * Whatever is on the clipboard becomes the chooser's subject. Nothing is
+     * generated until the reader says which of the two things they want, except
+     * that work already on screen from a previous opening is left alone.
+     */
     private fun loadFromClipboard() {
-        val text = textSource.read()
-        when {
-            text.isNullOrBlank() ->
-                // Only fall back to the paste field if there is nothing already
-                // on screen worth keeping.
-                if (viewModel.state !is RemixUiState.Ready) viewModel.reset()
-            else -> viewModel.load(text)
-        }
+        val text = textSource.read()?.trim().orEmpty()
+        if (text.isEmpty()) return
+        if (text == clipboard) return
+        clipboard = text
+        // A new message means the old grid and the old replies are stale.
+        if (viewModel.state !is RemixUiState.Ready) viewModel.reset()
+        repliesModel.reset()
     }
 
     private fun copyToClipboard(text: String) {

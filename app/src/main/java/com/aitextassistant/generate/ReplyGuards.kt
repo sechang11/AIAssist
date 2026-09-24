@@ -43,6 +43,20 @@ object ReplyGuards {
         RegexOption.IGNORE_CASE,
     )
 
+    /**
+     * Reasons the reader never gave. Inventing one is the same failure as
+     * inventing a time and is worse in practice, because "sorry, busy" reads as
+     * true and gets sent. Kept tight on purpose: every word here is one a reply
+     * has no business introducing, and word boundaries mean "that works for me"
+     * is not caught by "work".
+     */
+    private val EXCUSE = Regex(
+        "\\b(busy|swamped|work|working|meeting|shift|sick|unwell|dentist|doctor|" +
+            "appointment|hungover|exhausted)\\b|" +
+            "\\b(?:got|have|having|made|already have) (?:other )?plans\\b",
+        RegexOption.IGNORE_CASE,
+    )
+
     private val GREETING = Regex("^\\s*(hi|hey|hello|dear)\\b[\\s,!.]*", RegexOption.IGNORE_CASE)
 
     private val SIGNOFF = Regex(
@@ -66,6 +80,12 @@ object ReplyGuards {
 
     private const val MAX_LABEL_WORDS = 3
 
+    /** A label may not end on one of these; it is waiting for the next word. */
+    private val DANGLING = setOf(
+        "a", "an", "the", "to", "of", "for", "and", "or", "with", "about",
+        "some", "any", "their", "your", "my", "listening",
+    )
+
     /**
      * A label for the card. The model is asked for three words and returns
      * "acknowledge receipt, provide brief update" often enough that asking
@@ -75,7 +95,11 @@ object ReplyGuards {
         val firstClause = raw.substringBefore(',').trim().trimEnd('.', '!', ':', ';')
         val words = firstClause.split(WHITESPACE).filter { it.isNotBlank() }
         if (words.isEmpty()) return "reply"
-        return words.take(MAX_LABEL_WORDS).joinToString(" ").lowercase()
+        // "offer a listening ear" cut to three words ends on "listening", which
+        // is worse than two words. Drop anything left dangling.
+        val cut = words.take(MAX_LABEL_WORDS).toMutableList()
+        while (cut.size > 1 && cut.last().lowercase() in DANGLING) cut.removeAt(cut.lastIndex)
+        return cut.joinToString(" ").lowercase()
     }
 
     /** Greetings and sign-offs belong in an email, and the model knows better most of the time. */
@@ -91,6 +115,16 @@ object ReplyGuards {
     fun inventedTimes(incoming: String, text: String): List<String> {
         val said = TIMEY.findAll(incoming).map { it.value.lowercase() }.toSet()
         return TIMEY.findAll(text)
+            .map { it.value.lowercase() }
+            .filter { it !in said }
+            .distinct()
+            .toList()
+    }
+
+    /** Excuses in [text] that [incoming] never gave. Empty is the good case. */
+    fun inventedExcuses(incoming: String, text: String): List<String> {
+        val said = EXCUSE.findAll(incoming).map { it.value.lowercase() }.toSet()
+        return EXCUSE.findAll(text)
             .map { it.value.lowercase() }
             .filter { it !in said }
             .distinct()
@@ -130,6 +164,7 @@ object ReplyGuards {
             val text = tidyText(reply.text)
             if (text.isEmpty() || isStub(text) || tooLong(text)) continue
             if (inventedTimes(incoming, text).isNotEmpty()) continue
+            if (inventedExcuses(incoming, text).isNotEmpty()) continue
             val print = fingerprint(text)
             if (print.isEmpty() || !seen.add(print)) continue
             kept.add(Reply(intent = tidyIntent(reply.intent), text = text))

@@ -61,6 +61,8 @@ fun RepliesScreen(
                 fontWeight = FontWeight.Bold,
             )
 
+            if (usingStub()) StubWarning()
+
             Card(
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,

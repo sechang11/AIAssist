@@ -75,6 +75,7 @@ fun RemixScreen(
     onSecondaryAction: (String) -> Unit = {},
 ) {
     Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.surface) {
+        val placeholders = usingStub()
         when (state) {
             is RemixUiState.Idle, is RemixUiState.Loading -> Centered {
                 CircularProgressIndicator()
@@ -93,6 +94,7 @@ fun RemixScreen(
             }
 
             is RemixUiState.Ready -> Ready(
+                warning = { if (placeholders) StubWarning() },
                 remix = state.remix,
                 streaming = state.streaming,
                 original = original,
@@ -112,6 +114,7 @@ fun RemixScreen(
 
 @Composable
 private fun Ready(
+    warning: @Composable () -> Unit,
     remix: Remix,
     streaming: Boolean,
     original: String,
@@ -126,6 +129,8 @@ private fun Ready(
     onSecondaryAction: (String) -> Unit,
 ) {
     Column(Modifier.fillMaxSize()) {
+
+        warning()
 
         Text(
             "Remix",
