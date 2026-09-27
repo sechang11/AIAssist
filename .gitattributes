@@ -1,0 +1,3 @@
+# Run on Linux, so they must keep LF whatever the checkout platform does.
+*.sh text eol=lf
+gradlew text eol=lf

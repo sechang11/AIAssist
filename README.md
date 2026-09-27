@@ -8,6 +8,12 @@ Two ways in: the selection toolbar of every app, via `ACTION_PROCESS_TEXT`,
 and a floating chat head. No accessibility service and no default-SMS role,
 so nothing Play review objects to.
 
+It does two jobs. Rewriting a message you wrote, beat by beat, and suggesting
+replies to one you were sent. They are separate machinery on purpose: a rewrite
+has an original to stay faithful to and the guards exist to protect it, while a
+reply has no original, so the risk runs the other way, towards inventing a
+commitment you never made.
+
 ## What measurement actually showed
 
 Two things, and the second one reverses the first.
@@ -104,10 +110,27 @@ test messages are correctly a single beat. `GridBuilder` then asks for three
 phrasings of one short fragment at a time, which is the job small models are
 actually good at.
 
-Two failure modes now go by construction rather than by instruction. Beats
-cannot repeat each other, because a beat never sees its neighbours' output;
-that measure went from 15% to 95%. And a lossy beat is cheap to retry alone
-rather than discarding the whole message.
+A lossy beat is also cheap to retry on its own rather than discarding the whole
+message.
+
+One claim that used to be here was wrong, and `eval/bleed.py` is what found it.
+Beats were said to be unable to repeat each other, because no beat sees its
+neighbours' output. They do not, but every beat sees the whole original message
+as context, and 9% of rewritten cells pull in content belonging to a different
+beat. Reading them, about half are an improvement: "have a great time though"
+becoming "have fun at your sister's wedding!" is the rewrite using context the
+way you would want. The other half duplicate, and the assembled message says the
+same thing twice:
+
+    Apologies for missing the standup. | My train was cancelled.
+    -> "sorry about missing the standup, my train got cancelled."
+
+Both halves pass every guard, because every guard looks at one beat alone.
+Telling the model why not to do it, rather than only that it must not, moved the
+number from 9% to 8%, which is nothing. Left unfixed and measured rather than
+claimed away: the useful form of the fix probably works on the assembled
+message rather than on any single beat, which is a different design than the
+one here.
 
 Then the guarantee: if a rewrite loses a date, time, number or name that was in
 the fragment, it is not shown at all and that beat falls back to the writer's
@@ -133,8 +156,14 @@ it, tap Remix, and the reworked version replaces it in place. No permission, no
 pasting.
 
 **The bubble** (`bubble/`) is a chat head, in the Messenger sense: a circle
-floating over every app, for text you did not write. Copy the message, tap the
-bubble, pick your wording, and it goes back on the clipboard. It needs the
+floating over every app. Copy a message, tap the bubble, and it asks which of
+the two things you want, because the text you have just copied is as likely to
+be one you were sent as one you wrote:
+
+- **I wrote this** rewrites it, the same grid as everywhere else.
+- **They sent this** suggests three replies, with a button for three more.
+
+Either way the result goes back on the clipboard for you to paste. It needs the
 draw-over-other-apps permission, which the user grants in a system settings
 screen, and it runs a foreground service with a permanent notification because
 an overlay cannot outlive a background process.
@@ -205,14 +234,51 @@ move to an on-device model and say nothing leaves the phone.
 
 ## What has actually been run
 
-Debug and release both build, and 33 unit tests pass. That happened on a Fedora
+Debug and release both build and the unit tests pass. That happens on a Fedora
 box with a hand-built toolchain, not in Android Studio, so treat the IDE as
 unverified rather than the code.
 
-**Never run on a phone.** Everything below the compiler is untested: whether the
-chat head drags properly, whether an overlay window can really read the
-clipboard once focused, how the streaming beats feel, whether the tap-to-offset
+What has been checked against a live model, over the LAN, on the same prompts
+and the same guards the app ships:
+
+- Rewriting. `cant make friday sorry` comes back three genuinely different ways.
+- Replies, on ten deliberately awkward incoming messages.
+- Three more, which repeated none of the first three across all ten.
+- Bleeding between beats, at 9% of rewritten cells.
+
+**Still never run on a phone.** Everything between the compiler and the model is
+untested: whether the chat head drags properly, whether an overlay window can
+really read the clipboard once focused, whether the updater's download and
+install hand-off works, how the streaming beats feel, whether the tap-to-offset
 mapping on the message picks the right beat. All of that needs a device.
+
+## Updating it without a store
+
+Point the app at a machine on your wifi running `ollama serve` and it uses it
+for rewrites. It also looks for new builds on the same machine at port 8099,
+which is where `publish.sh` puts them, so there is one address to get right
+rather than two.
+
+```bash
+bash scripts/sync-build.sh "testDebugUnitTest assembleDebug"
+```
+
+```bash
+ssh box 'bash ~/publish.sh "what changed"'
+```
+
+That writes `latest.json` beside the APK. The app reads it on launch, compares
+one integer against its own `versionCode`, and offers the build with your note
+attached. Nothing installs on its own: Android shows its installer screen, and
+the app needs "install unknown apps" granted once.
+
+`versionCode` is minutes since 2025 rather than a commit count, so it still
+climbs between two builds off the same commit. `versionName` carries the commit,
+so you can tell what is on the phone. Both are passed in by the sync script,
+because the build box holds an unpacked copy of the tree with no git history.
+
+The first install still comes from the page at `http://<box>:8099`, since an
+app cannot update itself before it exists.
 
 ## Known gaps
 
@@ -243,6 +309,9 @@ mapping on the message picks the right beat. All of that needs a device.
   not wired up.
 - **The assembled message is not editable.** People will want one last manual
   tweak before sending.
+- **A beat's rewrite can duplicate the beat next to it**, at 9% of rewritten
+  cells. Measured by `eval/bleed.py`, and see "How the remix works" for why no
+  per-beat guard can catch it.
 - **Real latency is unmeasured.** On a 5090 a beat comes back in roughly half a
   second, but that says nothing about a phone or a round trip to an API.
 - **The debug APK is 17MB**, most of it the Anthropic SDK, Jackson and Compose.
